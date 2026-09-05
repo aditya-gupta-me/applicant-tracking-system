@@ -8,7 +8,8 @@
       "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["^lint"],
+      "inputs": ["src/**/*.ts", "eslint.config.js"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]

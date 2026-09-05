@@ -13,7 +13,9 @@
     "apps/api": {
       "name": "api",
       "devDependencies": {
+        "@repo/eslint-config": "workspace:*",
         "@types/bun": "latest",
+        "eslint": "10.9.1",
       },
       "peerDependencies": {
         "typescript": "^7",
