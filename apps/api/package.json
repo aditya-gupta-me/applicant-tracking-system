@@ -6,14 +6,20 @@
   "scripts": {
     "start": "bun run ./src/index.ts",
     "build": "bun build ./src/index.ts --outdir ./dist",
+    "dev": "bun --watch run ./src/index.ts",
     "lint": "eslint ."
   },
   "devDependencies": {
-    "@types/bun": "latest",
     "@repo/eslint-config": "workspace:*",
+    "@types/bun": "latest",
+    "@types/express": "^5.0.6",
     "eslint": "10.9.1"
   },
   "peerDependencies": {
-    "typescript": "^7"
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@types/node": "^26.4.1",
+    "express": "^5.2.1"
   }
 }
