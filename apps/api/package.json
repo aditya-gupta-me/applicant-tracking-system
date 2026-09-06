@@ -7,19 +7,28 @@
     "start": "bun run ./src/index.ts",
     "build": "bun build ./src/index.ts --outdir ./dist",
     "dev": "bun --watch run ./src/index.ts",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "contract:emit": "prisma contract emit"
   },
   "devDependencies": {
+    "@prisma/cli-engine": "0.2.3",
     "@repo/eslint-config": "workspace:*",
     "@types/bun": "latest",
     "@types/express": "^5.0.6",
-    "eslint": "10.9.1"
+    "eslint": "10.9.1",
+    "prisma": "7"
   },
   "peerDependencies": {
     "typescript": "^7.0.2"
   },
   "dependencies": {
+    "@better-auth/prisma-adapter": "^1.7.3",
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "7",
     "@types/node": "^26.4.1",
-    "express": "^5.2.1"
+    "better-auth": "^1.7.3",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.23.0"
   }
 }
