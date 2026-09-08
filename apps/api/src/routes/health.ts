@@ -1,11 +1,12 @@
 import express, { Router, Request, Response } from "express";
+import { prisma } from "../lib/prisma";
 
 const healthRouter: Router = express.Router();
 
 
 // equivalent to '/live'
 healthRouter.get('/',  (req: Request, res: Response) => {
-    console.log(req.method, req.url);
+    console.log(req.method, req.baseUrl + req.path);
     
     return res.status(200).json({
         status: "ok",
@@ -14,28 +15,34 @@ healthRouter.get('/',  (req: Request, res: Response) => {
     })
 })
 
+// api-endpoint for db health-check
 healthRouter.get('/ready', async (req: Request, res: Response) => {
-    console.log(req.method, req.url);
+    console.log(req.method, req.baseUrl + req.path);
 
     const databaseHealthy = await checkDatabase();
     if(!databaseHealthy){
         return res.status(503).json({
-            status: 'unavailable',
+            db_status: 'unavailable',
         })
     }
 
     return res.status(200).json({
-        status: 'ok',
+        db_status: 'ok',
     })
 })
 
-// simulating db health-check
+// db health-check function
 async function checkDatabase(): Promise<boolean> {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(true);
-        }, 2000)
-    });
+
+    // error-handling
+    try {
+        await prisma.$queryRaw`SELECT 1`;
+        return true;
+    }
+    catch (error) {
+        console.error("Database health check failed: ", error);
+        return false;
+    }
 }
 
 
