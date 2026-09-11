@@ -13,28 +13,38 @@ datasource db {
 }
 
 model User {
-  id            String    @id
-  name          String
+  id            String    @id @default(uuid())
+  firstName     String
+  lastName      String
+  role          String
   email         String
   emailVerified Boolean   @default(false)
+  isActive      Boolean   @default(true)
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  
+
+  organizationId  String
+  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
   sessions      Session[]
   accounts      Account[]
 
   @@unique([email])
+  @@index([organizationId])
   @@map("user")
 }
 
 model Session {
-  id        String   @id
+  id        String   @id @default(uuid())
   expiresAt DateTime
   token     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
+
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -44,11 +54,12 @@ model Session {
 }
 
 model Account {
-  id                    String    @id
+  id                    String    @id @default(uuid())
   accountId             String
   providerId            String
   userId                String
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -56,15 +67,17 @@ model Account {
   refreshTokenExpiresAt DateTime?
   scope                 String?
   password              String?
+
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
+  @@unique([providerId, accountId])
   @@index([userId])
   @@map("account")
 }
 
 model Verification {
-  id         String   @id
+  id         String   @id @default(uuid())
   identifier String
   value      String
   expiresAt  DateTime
@@ -74,3 +87,230 @@ model Verification {
   @@index([identifier])
   @@map("verification")
 }
+
+model Organization {
+  id              String     @id @default(uuid())
+  name            String
+  slug            String     
+  website         String
+  email           String
+  image           String
+  establishedDate DateTime
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  users           User[]
+  departments     Department[]
+  location        Location[]
+  jobs            Job[]
+
+  @@map("organizations")
+  @@unique([slug])
+}
+
+model Department {
+  id                String        @id @default(uuid())
+  name              String
+
+  organizationId    String     
+  organization      Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  jobs              Job[]
+
+  @@unique([organizationId, name])
+  @@map("department")
+}
+
+model Location {
+  id                  String        @id @default(uuid())
+  name                String?
+  latitude            Decimal
+  longitude           Decimal
+  formattedAddress    String?
+
+  createdAt           DateTime      @default(now())
+
+  organizationId      String
+  organization        Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("locations")
+}
+
+enum JobType {
+  FULL_TIME
+  INTERNSHIP
+  CONTRACT
+  PART_TIME
+  TEMPORARY
+}
+
+model Job {
+  id              String        @id @default(uuid())
+  title           String
+  description     String
+  location        String?
+  type            JobType
+
+  startDate       DateTime?
+  applyBy         DateTime?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  organizationId  String
+  organization    Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  departmentId    String
+  department      Department    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  jobSkills       JobSkills[]
+
+
+  @@index([organizationId])
+  @@index([departmentId])
+  @@map("jobs")
+}
+
+model JobSkills {
+  jobId                     String
+  job                       Job         @relation(fields: [jobId], references: [id], onDelete: Cascade)       
+  
+  skillId                   String
+  skills                    Skills      @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  isRequired                Boolean
+  importance                Int
+  minimumYearsExperience    Int
+
+  @@index([skillId])
+  @@id([jobId, skillId])
+  @@map("job_skill")
+}
+
+model Candidate {
+  id                    String      @id  @default(uuid())
+  firstName             String
+  lastName              String
+  email                 String
+  contactNumber         String
+  currentCity           String
+
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime
+
+  candidateSocials      CandidateSocial[]     
+  candidateExperiences  CandidateExperience[]
+  candidateEducation    CandidateEducation[]
+  candidateSkills       CandidateSkill[]
+
+  @@unique([email])
+  @@map("candidate")
+}
+
+
+model CandidateSocial {
+  id                  String     @id @default(uuid())
+  platform            String
+  url                 String
+
+  candidateId         String
+  candidate           Candidate  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@unique([candidateId, platform])
+  @@index([candidateId])
+  @@map("candidate_social")
+}
+
+model CandidateExperience {
+  id                  String    @id @default(uuid())
+  title               String
+  organizationName    String
+  startDate           DateTime
+  endDate             DateTime?
+  location            String
+  description         String[]
+
+  candidateId         String
+  candidate           Candidate  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@index([candidateId])
+  @@map("candidate_experience")
+}
+
+model CandidateEducation {
+  id                  String    @id @default(uuid())
+  institutionName     String
+  address             String?
+  programmeName       String
+  gpa                 Decimal?  @db.Decimal(4, 2)
+  startDate           DateTime?
+  endDate             DateTime?
+  major               String?
+  minor               String?
+  relevantCoursework  String[]
+
+  candidateId         String
+  candidate           Candidate  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@index([candidateId])
+  @@map("candidate_education")
+}
+
+model CandidateSkill {
+  id                  String     @id @default(uuid())
+  proficiencyLevel    String?
+  yearOfExperience    Decimal?
+  isPrimary           Boolean    @default(false)
+
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  candidateId         String
+  candidate           Candidate  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  skillsId            String
+  skills              Skills     @relation(fields: [skillsId], references: [id], onDelete: Cascade)
+
+  @@unique([candidateId, skillsId])
+  @@index([skillsId])
+  @@map("candidate_skill")
+}
+
+
+model SkillsCategory {
+  id                  String     @id @default(uuid())
+  categoryName        String
+  description         String?
+
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  skills              Skills[]
+
+  @@unique([categoryName])
+  @@map("skill_category")
+}
+
+model Skills {
+  id                  String         @id @default(uuid())
+  name                String
+  normalizedName      String    
+
+  isActive            Boolean        @default(true)
+
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  categoryId          String
+  category            SkillsCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  candidateSkills     CandidateSkill[]
+  jobSkills           JobSkills[]
+
+  @@unique([normalizedName])
+  @@map("skill")
+}
+
+
+
