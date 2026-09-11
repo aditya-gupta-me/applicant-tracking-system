@@ -26,6 +26,13 @@ enum JobType {
   TEMPORARY
 }
 
+enum ProficiencyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
 
 model User {
   id            String    @id @default(uuid())
@@ -266,7 +273,7 @@ model CandidateEducation {
 
 model CandidateSkill {
   id                  String     @id @default(uuid())
-  proficiencyLevel    String?
+  proficiencyLevel    ProficiencyLevel?
   yearOfExperience    Decimal?   @db.Decimal(4, 1)
   isPrimary           Boolean    @default(false)
 
