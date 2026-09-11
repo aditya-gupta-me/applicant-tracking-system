@@ -12,11 +12,26 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  ADMIN
+  RECRUITER
+  HIRING_MANAGER
+}
+
+enum JobType {
+  FULL_TIME
+  INTERNSHIP
+  CONTRACT
+  PART_TIME
+  TEMPORARY
+}
+
+
 model User {
   id            String    @id @default(uuid())
   firstName     String
   lastName      String
-  role          String
+  role          UserRole
   email         String
   emailVerified Boolean   @default(false)
   isActive      Boolean   @default(true)
@@ -137,14 +152,6 @@ model Location {
   @@map("locations")
 }
 
-enum JobType {
-  FULL_TIME
-  INTERNSHIP
-  CONTRACT
-  PART_TIME
-  TEMPORARY
-}
-
 model Job {
   id              String        @id @default(uuid())
   title           String
@@ -177,7 +184,7 @@ model JobSkills {
   job                       Job         @relation(fields: [jobId], references: [id], onDelete: Cascade)       
   
   skillId                   String
-  skills                    Skills      @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skill                     Skills      @relation(fields: [skillId], references: [id], onDelete: Cascade)
 
   isRequired                Boolean
   importance                Int
@@ -197,7 +204,7 @@ model Candidate {
   currentCity           String
 
   createdAt             DateTime    @default(now())
-  updatedAt             DateTime
+  updatedAt             DateTime    @updatedAt
 
   candidateSocials      CandidateSocial[]     
   candidateExperiences  CandidateExperience[]
@@ -260,7 +267,7 @@ model CandidateEducation {
 model CandidateSkill {
   id                  String     @id @default(uuid())
   proficiencyLevel    String?
-  yearOfExperience    Decimal?
+  yearOfExperience    Decimal?   @db.Decimal(4, 1)
   isPrimary           Boolean    @default(false)
 
   createdAt           DateTime   @default(now())
@@ -270,7 +277,7 @@ model CandidateSkill {
   candidate           Candidate  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
 
   skillsId            String
-  skills              Skills     @relation(fields: [skillsId], references: [id], onDelete: Cascade)
+  skill               Skills     @relation(fields: [skillsId], references: [id], onDelete: Cascade)
 
   @@unique([candidateId, skillsId])
   @@index([skillsId])
@@ -309,6 +316,7 @@ model Skills {
   jobSkills           JobSkills[]
 
   @@unique([normalizedName])
+  @@index([categoryId])
   @@map("skill")
 }
 
