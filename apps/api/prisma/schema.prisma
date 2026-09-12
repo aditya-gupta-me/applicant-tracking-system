@@ -36,9 +36,8 @@ enum ProficiencyLevel {
 
 model User {
   id            String    @id @default(uuid())
-  firstName     String
-  lastName      String
-  role          UserRole
+  name          String
+  role          UserRole?
   email         String
   emailVerified Boolean   @default(false)
   isActive      Boolean   @default(true)
@@ -47,8 +46,8 @@ model User {
   updatedAt     DateTime  @updatedAt
   
 
-  organizationId  String
-  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId  String?
+  organization    Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   sessions      Session[]
   accounts      Account[]
