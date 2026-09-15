@@ -1,10 +1,35 @@
-import { Navbar } from '@repo/ui/navbar'
+import { useEffect, useState } from "react";
+import { authClient } from "../lib/auth-client";
+import { Link } from "react-router-dom";
+
 
 function App() {
-  const className = 'flex p-6 justify-evenly'
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const fn = async () => {
+    const res = await authClient.getSession();
+
+    console.log(res);
+
+    if(res.data !== null || res.data !== undefined){
+      console.log("Came here");
+      setIsLoggedIn(true);
+    }
+  }
+
+  useEffect(() => {
+    fn();
+  }, [])
+
   return (
     <>
-    <Navbar title='ATS' searchPlaceholder='Search...' className={className} showSearch={true} userName='' authState={'Logout'}/>
+    {!isLoggedIn && 
+    <p>
+      You are not logged-in
+      <Link to={'/login'}>Login here</Link>
+    </p>}
+
+    {isLoggedIn && <p>Welcome user!</p>}
+    App.jsx
     </>
   )
 }

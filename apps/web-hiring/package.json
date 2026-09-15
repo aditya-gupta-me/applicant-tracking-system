@@ -12,8 +12,10 @@
   "dependencies": {
     "@repo/ui": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
+    "better-auth": "^1.7.5",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "react-router-dom": "^7.18.4",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
