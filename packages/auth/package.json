@@ -1,0 +1,18 @@
+{
+  "name": "@repo/auth",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "main": "./src/auth-client.ts",
+  "types": "./src/auth-client.ts",
+  "exports": {
+    ".": {
+      "types": "./src/auth-client.ts",
+      "default": "./src/auth-client.ts"
+    }
+  },
+  "dependencies": {
+    "better-auth": "^1.7.5",
+    "@repo/typescript-config": "workspace:*"
+  }
+}

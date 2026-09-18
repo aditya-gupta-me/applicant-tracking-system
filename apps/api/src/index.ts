@@ -2,9 +2,16 @@ import express, { Application, Request, Response } from "express";
 import healthRouter from "./routes/health";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from './lib/auth';
+import cors from 'cors';
 
 const app: Application = express();
 const PORT: number = 3000;
+
+// Allow all cross-origin requests
+app.use(cors({
+    origin: 'http://localhost:5173', 
+    credentials: true
+}));
 
 // middleware
 app.use(express.json())
