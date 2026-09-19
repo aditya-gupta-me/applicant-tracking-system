@@ -3,7 +3,10 @@ import { z } from "zod";
 
 export const loginSchema = z.object({
     email: z.email("Please enter a valid email address"),
-    password: z.string()
+    password: z.string().refine(
+        (value) => value.trim().length > 0,
+        "Password is required"
+    )
 });
 
 export const signUpSchema = z.object({
