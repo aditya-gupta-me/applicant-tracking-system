@@ -9,28 +9,35 @@ import {
   FieldSeparator,
 } from "@repo/ui/components/field"
 import { Input } from "@repo/ui/components/input"
-import { useState } from "react"
 import { signIn } from '../../../../packages/auth/src/auth-client';
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { useForm } from "react-hook-form"
+import { loginSchema, type LoginInput } from "@repo/schema"
+import { zodResolver } from "@hookform/resolvers/zod"
 
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+
+    const { register, 
+      handleSubmit, 
+      formState: { errors }
+    } = useForm<LoginInput>({
+      resolver: zodResolver(loginSchema),
+      mode: "onChange"
+    });
 
     const navigate = useNavigate();
 
 
-    async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>){
-        event.preventDefault();
+    async function onSubmit(data: LoginInput){
 
         // call for better-auth Login API
         const { error } = await signIn.email({
-            email,
-            password
+          email: data.email,
+          password: data.password
         });
 
         if(error){
@@ -43,7 +50,7 @@ export function LoginForm({
         navigate('/dashboard');
     }
   return (
-    <form className={cn("flex flex-col gap-6", className)} onSubmit={handleSubmit} {...props}>
+    <form className={cn("flex flex-col gap-6", className)} onSubmit={handleSubmit(onSubmit)} {...props}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Login to your account</h1>
@@ -54,9 +61,11 @@ export function LoginForm({
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input id="email" type="email" placeholder="adityagupta@amazon.com"
-          value={email}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
-           required />
+          {...register("email", {
+            required: "Email is required"
+          })}
+          />
+           {errors.email && <p style={{color: "red"}}>{errors.email.message}</p>}
         </Field>
         <Field>
           <div className="flex items-center">
@@ -69,10 +78,11 @@ export function LoginForm({
             </a>
           </div>
           <Input id="password" type="password" placeholder="••••••••"
-          minLength={8}
-          value={password}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
-          required />
+          {...register("password", {
+            required: "Password is required"
+          })}
+          />
+          {errors.password && <p style={{color: "red"}}>{errors.password.message}</p>}
         </Field>
         <Field>
           <Button type="submit" className={"cursor-pointer"}>Login</Button>
@@ -90,9 +100,9 @@ export function LoginForm({
           </Button>
           <FieldDescription className="text-center">
             Don&apos;t have an account?{" "}
-            <a href="#" className="underline underline-offset-4">
+            <Link to="/signup" className="underline underline-offset-4">
               Sign up
-            </a>
+            </Link>
           </FieldDescription>
         </Field>
       </FieldGroup>
