@@ -44,7 +44,8 @@ model User {
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  
+
+  onboarding    Onboarding?
 
   organizationId  String?
   organization    Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -326,5 +327,14 @@ model Skills {
   @@map("skill")
 }
 
+model Onboarding {
+  id                           String          @id @default(uuid())
+  organizationCompleted        Boolean         @default(false)
+  profileCompleted             Boolean         @default(false)
+  tourCompleted                Boolean         @default(false)
 
+  userId                       String          @unique
+  user                         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@map("onboarding")
+}
