@@ -13,7 +13,9 @@ import { Link, useNavigate } from "react-router-dom"
 import { signUpSchema, type SignUpInput } from '@repo/schema';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signUp } from "@repo/auth"
+import { signUp, useSession } from "@repo/auth"
+import Loading from "./Loading";
+import { Spinner } from "@repo/ui/components/spinner";
 
 export function SignupForm({
   className,
@@ -21,13 +23,15 @@ export function SignupForm({
 }: React.ComponentProps<"form">) {
   const { register, 
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
     mode: "onChange",
   });
 
   const navigate = useNavigate();
+
+  const { isPending } = useSession();
 
   async function onSubmit(data: SignUpInput) {
 
@@ -48,6 +52,10 @@ export function SignupForm({
 
     console.log('Signed Up successfully!');
     navigate('/dashboard');
+  }
+
+  if(isPending){
+    return <Loading/>
   }
 
   return (
@@ -108,7 +116,10 @@ export function SignupForm({
           <FieldDescription>Please confirm your password.</FieldDescription>
         </Field>
         <Field>
-          <Button type="submit" className={"cursor-pointer"}>Create Account</Button>
+          <Button type="submit" className={"cursor-pointer"} disabled={isSubmitting}>
+            {isSubmitting && <Spinner className="size-4"/>}
+            {isSubmitting ? "Signing up..." : "Create Account"}
+            </Button>
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
         <Field>

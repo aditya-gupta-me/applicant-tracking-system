@@ -9,11 +9,13 @@ import {
   FieldSeparator,
 } from "@repo/ui/components/field"
 import { Input } from "@repo/ui/components/input"
-import { signIn } from '../../../../packages/auth/src/auth-client';
 import { Link, useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { loginSchema, type LoginInput } from "@repo/schema"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useSession, signIn } from '@repo/auth';
+import { Spinner } from "@repo/ui/components/spinner";
+import Loading from "./Loading"
 
 
 export function LoginForm({
@@ -23,31 +25,35 @@ export function LoginForm({
 
     const { register, 
       handleSubmit, 
-      formState: { errors }
+      formState: { errors, isSubmitting }
     } = useForm<LoginInput>({
       resolver: zodResolver(loginSchema),
       mode: "onChange"
     });
 
+    const { isPending } = useSession();
+
     const navigate = useNavigate();
 
 
     async function onSubmit(data: LoginInput){
+      // call for better-auth Login API
+      const { error } = await signIn.email({
+        email: data.email,
+        password: data.password
+      });
 
-        // call for better-auth Login API
-        const { error } = await signIn.email({
-          email: data.email,
-          password: data.password
-        });
-
-        if(error){
-          console.error(error);
-          return;
-        }
+      if(error){
+        console.error(error);
+        return;
+      }
 
 
-        // successful log-in
-        navigate('/dashboard');
+      // successful log-in
+      navigate('/dashboard');
+    }
+    if(isPending){
+      return <Loading/>;
     }
   return (
     <form className={cn("flex flex-col gap-6", className)} onSubmit={handleSubmit(onSubmit)} {...props}>
@@ -85,7 +91,10 @@ export function LoginForm({
           {errors.password && <p style={{color: "red"}}>{errors.password.message}</p>}
         </Field>
         <Field>
-          <Button type="submit" className={"cursor-pointer"}>Login</Button>
+          <Button type="submit" className={"cursor-pointer"} disabled={isSubmitting}>
+            {isSubmitting && <Spinner className="size-4" />}
+            {isSubmitting ? "Logging in..." : "Login"}
+          </Button>
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
         <Field>

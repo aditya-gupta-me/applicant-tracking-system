@@ -6,24 +6,41 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Login from './pages/Auth/Login.tsx'
 import SignUp from './pages/Auth/SignUp.tsx'
 import Dashboard from './pages/Dashboard.tsx'
+import { ProtectedRoute } from './components/auth/ProtectedLayout.tsx'
+import { GuestLayout } from './components/auth/GuestLayout.tsx'
 
 
 const router = createBrowserRouter([
+  // Public Routes
   {
     path: '/',
     element: <App/>
   },
+
+  // Guest only routes
   {
-    path: '/login',
-    element: <Login/>
+    element: <GuestLayout/>,
+    children: [
+      {
+        path: '/login',
+        element: <Login/>
+      },
+      {
+        path: '/signup',
+        element: <SignUp/>
+      }
+    ]
   },
+
+  // Protected Routes Group
   {
-    path: '/signup',
-    element: <SignUp/>
-  },
-  {
-    path: '/dashboard',
-    element: <Dashboard/>
+    element: <ProtectedRoute/>,
+    children: [
+      {
+        path: '/dashboard',
+        element: <Dashboard/>
+      }
+    ]
   }
 ])
 
