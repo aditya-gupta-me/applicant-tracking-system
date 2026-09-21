@@ -8,6 +8,7 @@ import SignUp from './pages/Auth/SignUp.tsx'
 import Dashboard from './pages/Dashboard.tsx'
 import { ProtectedRoute } from './components/auth/ProtectedLayout.tsx'
 import { GuestLayout } from './components/auth/GuestLayout.tsx'
+import OnboardingOrganization from './pages/Onboarding/OnboardingOrganization.tsx'
 
 
 const router = createBrowserRouter([
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
       {
         path: '/dashboard',
         element: <Dashboard/>
+      },
+      {
+        path: '/onboarding/organization',
+        element: <OnboardingOrganization/>
       }
     ]
   }
