@@ -140,6 +140,8 @@ model OrganizationAdmin {
 
   adminId         String          @unique
   user            User            @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@map("organization_admin")
 }
 
 model Department {
