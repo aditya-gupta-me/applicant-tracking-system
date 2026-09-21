@@ -19,6 +19,7 @@
         "@better-auth/prisma-adapter": "^1.7.3",
         "@prisma/adapter-pg": "^7.10.0",
         "@prisma/client": "7",
+        "@repo/schema": "workspace:*",
         "@types/cors": "^2.8.19",
         "@types/node": "^26.4.1",
         "better-auth": "^1.7.3",
@@ -26,6 +27,8 @@
         "dotenv": "^17.4.2",
         "express": "^5.2.1",
         "pg": "^8.23.0",
+        "slugify": "^1.6.9",
+        "zod": "^4.6.5",
       },
       "devDependencies": {
         "@prisma/cli-engine": "0.2.3",
@@ -1367,6 +1370,8 @@
     "signal-exit": ["signal-exit@4.1.0", "", {}, "sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw=="],
 
     "sisteransi": ["sisteransi@1.0.5", "", {}, "sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg=="],
+
+    "slugify": ["slugify@1.6.9", "", {}, "sha512-vZ7rfeehZui7wQs438JXBckYLkIIdfHOXsaVEUMyS5fHo1483l1bMdo0EDSWYclY0yZKFOipDy4KHuKs6ssvdg=="],
 
     "smart-buffer": ["smart-buffer@4.2.0", "", {}, "sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg=="],
 
