@@ -46,6 +46,7 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   onboarding    Onboarding?
+  admin         OrganizationAdmin?
 
   organizationId  String?
   organization    Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -116,7 +117,7 @@ model Organization {
   slug            String     
   website         String
   email           String
-  image           String
+  image           String?
   establishedDate DateTime
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
@@ -125,9 +126,20 @@ model Organization {
   departments     Department[]
   location        Location[]
   jobs            Job[]
+  admin           OrganizationAdmin?
 
   @@map("organizations")
   @@unique([slug])
+}
+
+model OrganizationAdmin {
+  id              String          @id @default(uuid())
+
+  orgId           String          @unique
+  organization    Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  adminId         String          @unique
+  user            User            @relation(fields: [adminId], references: [id], onDelete: Cascade)
 }
 
 model Department {
