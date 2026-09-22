@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma"; // your prisma client instance
 import { createAuthMiddleware } from "better-auth/api";
+import { bearer } from "better-auth/plugins";
 
 export const auth = betterAuth({
     trustedOrigins: ["http://localhost:5173"],
@@ -17,6 +18,10 @@ export const auth = betterAuth({
     socialProviders: {
         // TODO: add more providers
     },
+
+    plugins: [
+        bearer()
+    ],
 
     hooks: {
         after: createAuthMiddleware(async (ctx) => {
