@@ -9,6 +9,8 @@ import Dashboard from './pages/Dashboard.tsx'
 import { ProtectedRoute } from './components/auth/ProtectedLayout.tsx'
 import { GuestLayout } from './components/auth/GuestLayout.tsx'
 import OnboardingOrganization from './pages/Onboarding/OnboardingOrganization.tsx'
+import CreateOrganization from './pages/Onboarding/CreateOrganization.tsx'
+import JoinOrganization from './pages/Onboarding/JoinOrganization.tsx'
 
 
 const router = createBrowserRouter([
@@ -44,6 +46,14 @@ const router = createBrowserRouter([
       {
         path: '/onboarding/organization',
         element: <OnboardingOrganization/>
+      },
+      {
+        path: '/onboarding/organization/create',
+        element: <CreateOrganization/>
+      },
+      {
+        path: '/onboarding/organization/join',
+        element: <JoinOrganization/>
       }
     ]
   }
