@@ -18,7 +18,13 @@ organizationRouter.post('/create', protectedRoute, async (req: Request, res: Res
     // handle zod validation error
     // catches errors
     if(!body.success){
-        return res.status(422).json({ error: body.error});
+        return res.status(422).json({
+            error: {
+                code: "VALIDATION_ERROR",
+                message: "Please check the submitted organization details.",
+                details: body.error.issues
+            }
+        });
     }
 
     const adminId = req.user?.id;
@@ -44,7 +50,7 @@ organizationRouter.post('/create', protectedRoute, async (req: Request, res: Res
 
     try {
 
-        await prisma.$transaction( async (tx) => {
+        const organization = await prisma.$transaction(async (tx) => {
             const org = await tx.organization.create({
                 data: {
                     name: body.data.name,
@@ -56,6 +62,16 @@ organizationRouter.post('/create', protectedRoute, async (req: Request, res: Res
                 }
             });
 
+            // insert for user table
+            await tx.user.update({
+                where: {
+                    id: adminId,
+                },
+                data: {
+                    organizationId: org.id
+                }
+            })
+
             // insert for admin
             await tx.organizationAdmin.create({
                 data: {
@@ -63,18 +79,47 @@ organizationRouter.post('/create', protectedRoute, async (req: Request, res: Res
                     adminId
                 }
             })
-            
-            return res.status(200).json({
-                message: "Success! Organization created!",
-            });
+
+            return org;
         }) 
+
+        return res.status(201).json({
+            message: "Organization created successfully.",
+            data: { organizationId: organization.id }
+        });
     } catch(error) {
         console.error("Transaction failed & rolled back: ", error);
         return res.status(500).json({
-            error
+            error: {
+                code: "INTERNAL_SERVER_ERROR",
+                message: "We could not create the organization. Please try again."
+            }
         })
     }
 
+})
+
+organizationRouter.get('/user-exists', protectedRoute, async (req: Request, res: Response) => {
+    console.log(req.method, req.baseUrl + req.path);
+
+    const userId = req.user?.id;
+
+    if(!userId) {
+        return res.status(401).json({
+            error: "Unauthorized"
+        })
+    }
+
+    const userExists = await prisma.user.findUnique({
+        where: {
+            id: userId,
+            organizationId: { not : null }
+        }
+    })
+
+    return res.status(200).json({
+        exists: Boolean(userExists)
+    })
 })
 
 export default organizationRouter;

@@ -4,6 +4,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from './lib/auth';
 import cors from 'cors';
 import organizationRouter from "./routes/organization";
+import organizationAdmin from "./routes/organizationAdmin";
 
 const app: Application = express();
 const PORT: number = 3000;
@@ -12,7 +13,8 @@ const PORT: number = 3000;
 app.use(cors({
     origin: 'http://localhost:5173', 
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 // middleware
@@ -27,6 +29,9 @@ app.use('/api/health', healthRouter);
 
 // organization
 app.use('/api/organization', organizationRouter);
+
+// organization-Admin
+app.use('/api/organization/admin', organizationAdmin);
 
 // base endpoint
 app.get('/', (req: Request, res: Response) => {
