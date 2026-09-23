@@ -8,42 +8,43 @@ import { Input } from "@repo/ui/components/input";
 import { useForm } from "react-hook-form";
 import { createOrganizationSchema, type OrganizationInput } from "@repo/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { email, z } from "zod";
+import { z } from "zod";
+import { api } from "@/api/api";
+import { useState } from "react";
 import axios from "axios";
 
 export default function CreateOrganization() {
     const {
         register,
         handleSubmit,
-        formState: { errors, isSubmitting }
+        formState: { errors }
     } = useForm<z.input<typeof createOrganizationSchema>, unknown, OrganizationInput>({
         resolver: zodResolver(createOrganizationSchema),
         mode: "onChange"
     })
 
+    const [error, setError] = useState("");
     const navigate = useNavigate();
 
     async function onSubmit(data: OrganizationInput) {
-        // LOG
-        console.log("Validated: ", data);
+        setError("");
 
-        // console.log("ENV: ", import.meta.env.VITE_API_BASE_URL)
-        const res = await axios.post(import.meta.env.VITE_API_BASE_URL + 'api/organization/create', {
-            name: data.name,
-            website: data.website,
-            email: data.email,
-            establishedDate: data.establishedDate
-        });
+        try {
+            await api.post('api/organization/create', {
+                name: data.name,
+                website: data.website,
+                email: data.email,
+                establishedDate: data.establishedDate
+            });
 
-        console.log(res);
-
-        if(res.status !== 200){
-            console.error(res.data.error);
-            return;
+            navigate('/dashboard');
+        } catch (error: unknown) {
+            if (axios.isAxiosError<{ error?: { message?: string } }>(error)) {
+                setError(error.response?.data.error?.message ?? "Unable to create the organization.");
+            } else {
+                setError("Unable to create the organization. Please try again.");
+            }
         }
-
-        console.log('Organization created successfully!')
-        navigate('/dashboard');        
     }
     return (
         <>
@@ -114,6 +115,7 @@ export default function CreateOrganization() {
                                     Create organization
                                 </Button>
                             </FieldGroup>
+                            {error && <p style={{color: "red", textAlign: "center"}}>{error}</p>}
                         </form>
                     </CardContent>
                 </Card>

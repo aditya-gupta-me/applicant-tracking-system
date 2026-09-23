@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
@@ -6,12 +6,21 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Login from './pages/Auth/Login.tsx'
 import SignUp from './pages/Auth/SignUp.tsx'
 import Dashboard from './pages/Dashboard.tsx'
-import { ProtectedRoute } from './components/auth/ProtectedLayout.tsx'
-import { GuestLayout } from './components/auth/GuestLayout.tsx'
+import { ProtectedLayout } from './components/layout/ProtectedLayout.tsx'
+import { GuestLayout } from './components/layout/GuestLayout.tsx'
 import OnboardingOrganization from './pages/Onboarding/OnboardingOrganization.tsx'
 import CreateOrganization from './pages/Onboarding/CreateOrganization.tsx'
 import JoinOrganization from './pages/Onboarding/JoinOrganization.tsx'
+import { NoOrganizationRequiredLayout } from './components/layout/NoOrganizationRequiredLayout.tsx'
+import { useOrganizationStore } from './store/useOrganizationStore.ts'
 
+function OrganizationStatusBootstrap() {
+  useEffect(() => {
+    void useOrganizationStore.getState().checkOrganizationStatus();
+  }, []);
+
+  return null;
+}
 
 const router = createBrowserRouter([
   // Public Routes
@@ -37,30 +46,38 @@ const router = createBrowserRouter([
 
   // Protected Routes Group
   {
-    element: <ProtectedRoute/>,
+    element: <ProtectedLayout/>,
     children: [
       {
         path: '/dashboard',
         element: <Dashboard/>
       },
       {
-        path: '/onboarding/organization',
-        element: <OnboardingOrganization/>
+        element: <NoOrganizationRequiredLayout/>,
+        children: [
+          {
+            path: '/onboarding/organization',
+            element: <OnboardingOrganization/>
+          },
+          {
+            path: '/onboarding/organization/create',
+            element: <CreateOrganization/>
+          },
+          {
+            path: '/onboarding/organization/join',
+            element: <JoinOrganization/>
+          }
+        ]
       },
-      {
-        path: '/onboarding/organization/create',
-        element: <CreateOrganization/>
-      },
-      {
-        path: '/onboarding/organization/join',
-        element: <JoinOrganization/>
-      }
     ]
   }
 ])
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router}/>
+    <>
+      <OrganizationStatusBootstrap />
+      <RouterProvider router={router}/>
+    </>
   </StrictMode>,
 )
