@@ -12,7 +12,7 @@ datasource db {
   provider = "postgresql"
 }
 
-enum UserRole {
+enum OrganizationMemberRole {
   ADMIN
   RECRUITER
   HIRING_MANAGER
@@ -33,11 +33,16 @@ enum ProficiencyLevel {
   EXPERT
 }
 
+enum OrganizationInviteStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+}
+
 
 model User {
   id            String    @id @default(uuid())
   name          String
-  role          UserRole?
   email         String
   emailVerified Boolean   @default(false)
   isActive      Boolean   @default(true)
@@ -45,17 +50,15 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  onboarding    Onboarding?
-  admin         OrganizationAdmin?
-
-  organizationId  String?
-  organization    Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  onboarding            Onboarding?
+  admin                 Organization?
+  organizationMember    OrganizationMembers?
 
   sessions      Session[]
   accounts      Account[]
 
   @@unique([email])
-  @@index([organizationId])
+  @@index([email])
   @@map("user")
 }
 
@@ -122,26 +125,36 @@ model Organization {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   
-  users           User[]
   departments     Department[]
   location        Location[]
   jobs            Job[]
-  admin           OrganizationAdmin?
+  organizationMembers     OrganizationMembers?
+  adminId         String  @unique
+  user            User    @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
   @@map("organizations")
   @@unique([slug])
 }
 
-model OrganizationAdmin {
-  id              String          @id @default(uuid())
+model OrganizationMembers {
+  userId          String         @unique
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  orgId           String          @unique
-  organization    Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  orgId           String         @unique
+  organization    Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  
+  role            OrganizationMemberRole
+  joinedAt        DateTime       @default(now())
+}
 
-  adminId         String          @unique
-  user            User            @relation(fields: [adminId], references: [id], onDelete: Cascade)
+model OrganizationInvites {
+  invite_token      String        @id @default(uuid())
+  orgId             String
+  email             String
+  role              OrganizationMemberRole
+  expiresAt         DateTime
+  status            OrganizationInviteStatus
 
-  @@map("organization_admin")
 }
 
 model Department {
