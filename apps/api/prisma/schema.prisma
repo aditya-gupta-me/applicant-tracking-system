@@ -145,6 +145,9 @@ model OrganizationMembers {
   
   role            OrganizationMemberRole
   joinedAt        DateTime       @default(now())
+
+  @@map("organization_members")
+  @@index([userId, orgId])
 }
 
 model OrganizationInvites {
@@ -155,6 +158,7 @@ model OrganizationInvites {
   expiresAt         DateTime
   status            OrganizationInviteStatus
 
+  @@map("organization_invites")
 }
 
 model Department {
