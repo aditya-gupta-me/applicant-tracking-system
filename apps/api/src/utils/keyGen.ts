@@ -1,5 +1,9 @@
 import crypto from "node:crypto";
 
-const secretKeyHex = crypto.randomBytes(32).toString('hex');
+function generateRandomSecretKey(numberOfRandomBytes: number) {
+    const secretKeyHex = crypto.randomBytes(numberOfRandomBytes).toString('hex');
 
-console.log("Generated key: ", secretKeyHex);
+    return secretKeyHex;
+}
+
+export default generateRandomSecretKey;
