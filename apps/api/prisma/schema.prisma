@@ -162,7 +162,7 @@ model OrganizationInvite {
   email             String
   role              OrganizationMemberRole
   expiresAt         DateTime
-  status            OrganizationInviteStatus
+  status            OrganizationInviteStatus    @default(PENDING)
 
   @@map("organization_invites")
 }
