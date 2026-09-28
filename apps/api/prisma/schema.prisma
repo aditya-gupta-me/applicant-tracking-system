@@ -50,15 +50,15 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  onboarding            Onboarding?
-  admin                 Organization?
-  organizationMember    OrganizationMembers?
+  onboarding              Onboarding?
+
+  adminOfOrganization     Organization?
+  organizationMembers     OrganizationMember[]
 
   sessions      Session[]
   accounts      Account[]
 
   @@unique([email])
-  @@index([email])
   @@map("user")
 }
 
@@ -124,35 +124,41 @@ model Organization {
   establishedDate DateTime
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
-  
-  departments     Department[]
-  location        Location[]
-  jobs            Job[]
-  organizationMembers     OrganizationMembers?
+
   adminId         String  @unique
   user            User    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  departments     Department[]
+  locations        Location[]
+  jobs            Job[]
+  organizationMembers     OrganizationMember[]
+  organizationInvites     OrganizationInvite[]
 
   @@map("organizations")
   @@unique([slug])
 }
 
-model OrganizationMembers {
-  userId          String         @unique
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+model OrganizationMember {
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  orgId           String         @unique
-  organization    Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  
-  role            OrganizationMemberRole
-  joinedAt        DateTime       @default(now())
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
+  role         OrganizationMemberRole
+  joinedAt     DateTime     @default(now())
+
+  @@id([userId, orgId])
+  @@index([orgId])
   @@map("organization_members")
-  @@index([userId, orgId])
 }
 
-model OrganizationInvites {
-  invite_token      String        @id @default(uuid())
+model OrganizationInvite {
+  inviteToken      String        @id @default(uuid())
+
   orgId             String
+  organization      Organization  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
   email             String
   role              OrganizationMemberRole
   expiresAt         DateTime
@@ -170,6 +176,7 @@ model Department {
 
   jobs              Job[]
 
+  @@unique([organizationId, id])
   @@unique([organizationId, name])
   @@map("department")
 }
@@ -207,9 +214,9 @@ model Job {
   organization    Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   departmentId    String
-  department      Department    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  department      Department    @relation(fields: [organizationId, departmentId], references: [organizationId, id], onDelete: Cascade)
 
-  jobSkills       JobSkills[]
+  jobSkills       JobSkill[]
 
 
   @@index([organizationId])
@@ -217,19 +224,19 @@ model Job {
   @@map("jobs")
 }
 
-model JobSkills {
+model JobSkill {
   jobId                     String
   job                       Job         @relation(fields: [jobId], references: [id], onDelete: Cascade)       
   
   skillId                   String
-  skill                     Skills      @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skill                     Skill       @relation(fields: [skillId], references: [id], onDelete: Cascade)
 
   isRequired                Boolean
   importance                Int
   minimumYearsExperience    Int
 
-  @@index([skillId])
   @@id([jobId, skillId])
+  @@index([skillId])
   @@map("job_skill")
 }
 
@@ -314,16 +321,16 @@ model CandidateSkill {
   candidateId         String
   candidate           Candidate  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
 
-  skillsId            String
-  skill               Skills     @relation(fields: [skillsId], references: [id], onDelete: Cascade)
+  skillId            String
+  skill               Skill      @relation(fields: [skillId], references: [id], onDelete: Cascade)
 
-  @@unique([candidateId, skillsId])
-  @@index([skillsId])
+  @@unique([candidateId, skillId])
+  @@index([skillId])
   @@map("candidate_skill")
 }
 
 
-model SkillsCategory {
+model SkillCategory {
   id                  String     @id @default(uuid())
   categoryName        String
   description         String?
@@ -331,13 +338,13 @@ model SkillsCategory {
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
 
-  skills              Skills[]
+  skills              Skill[]
 
   @@unique([categoryName])
   @@map("skill_category")
 }
 
-model Skills {
+model Skill {
   id                  String         @id @default(uuid())
   name                String
   normalizedName      String    
@@ -348,10 +355,10 @@ model Skills {
   updatedAt           DateTime       @updatedAt
 
   categoryId          String
-  category            SkillsCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category            SkillCategory @relation(fields: [categoryId], references: [id])
 
   candidateSkills     CandidateSkill[]
-  jobSkills           JobSkills[]
+  jobSkills           JobSkill[]
 
   @@unique([normalizedName])
   @@index([categoryId])
