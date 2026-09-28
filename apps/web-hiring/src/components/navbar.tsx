@@ -3,12 +3,6 @@
 import { Book, ChevronDown, Menu, Sunset, Trees, UserRound, Zap } from "lucide-react";
 import { cn } from "cn";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@repo/ui/components/accordion";
 import { Button } from "@repo/ui/components/button";
 import {
   NavigationMenu,
@@ -29,6 +23,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { signOut, useSession } from "@repo/auth";
 import { Skeleton } from "@repo/ui/components/skeleton";
+import { useEffect, useRef, useState } from "react";
 
 
 // interfaces
@@ -67,7 +62,7 @@ const Navbar = ({
     url: "/",
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
     alt: "logo",
-    title: "Senior",
+    title: "Senior ATS",
   },
   menu = [
     { title: "Home", url: "/" },
@@ -150,19 +145,19 @@ const Navbar = ({
   const { data: session, isPending } = useSession();
   
   return (
-    <section className={cn("py-4", className)}>
-      <div className="container mx-auto w-full px-4">
+    <section className={cn("sticky top-0 z-40 border-b border-border/70 bg-background/90 py-3 backdrop-blur supports-backdrop-filter:bg-background/75", className)}>
+      <div className="container mx-auto w-full px-4 sm:px-6">
         {/* Desktop Menu */}
         <nav className="hidden items-center justify-between lg:flex">
           <div className="flex items-center gap-6">
             {/* Logo */}
-            <a href={logo.url} className="flex items-center gap-2">
+            <a href={logo.url} className="flex min-w-0 cursor-pointer items-center gap-2.5">
               <img
                 src={logo.src}
-                className="max-h-8 dark:invert"
+                className="size-8 rounded-lg object-contain dark:invert"
                 alt={logo.alt}
               />
-              <span className="text-lg font-semibold tracking-tighter">
+              <span className="font-heading text-lg font-semibold tracking-tight">
                 {logo.title}
               </span>
             </a>
@@ -174,7 +169,7 @@ const Navbar = ({
               </NavigationMenu>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             {isPending ? (
               <Skeleton className="size-9 rounded-full" />
             ) : session?.user ? (
@@ -193,33 +188,38 @@ const Navbar = ({
 
         {/* Mobile Menu */}
         <div className="block lg:hidden">
-          <div className="flex items-center justify-between">
+          <div className="flex min-w-0 items-center justify-between gap-4">
             {/* Logo */}
-            <a href={logo.url} className="flex items-center gap-2">
+            <a href={logo.url} className="flex min-w-0 cursor-pointer items-center gap-2.5">
               <img
                 src={logo.src}
-                className="max-h-8 dark:invert"
+                className="size-8 shrink-0 rounded-lg object-contain dark:invert"
                 alt={logo.alt}
               />
+              <span className="truncate font-heading text-base font-semibold tracking-tight">{logo.title}</span>
             </a>
             <Sheet>
-              <SheetTrigger render={<Button variant="outline" size="icon" />}><Menu className="size-4" /></SheetTrigger>
-              <SheetContent className="overflow-y-auto">
-                <SheetHeader>
+              <SheetTrigger render={<Button className="shrink-0 cursor-pointer" variant="outline" size="icon" />}><Menu className="size-4" /></SheetTrigger>
+              <SheetContent className="w-[min(24rem,calc(100vw-1rem))] overflow-y-auto px-0">
+                <SheetHeader className="border-b px-5 py-5">
                   <SheetTitle>
-                    <a href={logo.url} className="flex items-center gap-2">
+                    <a href={logo.url} className="flex min-w-0 cursor-pointer items-center gap-2.5">
                       <img
                         src={logo.src}
-                        className="max-h-8 dark:invert"
+                        className="size-8 rounded-lg object-contain dark:invert"
                         alt={logo.alt}
                       />
+                      <span className="font-heading text-base font-semibold tracking-tight">{logo.title}</span>
                     </a>
                   </SheetTitle>
                 </SheetHeader>
-                <div className="flex flex-col gap-6 p-4">
-                  <Accordion className="flex w-full flex-col gap-4">
+                <div className="flex flex-col gap-7 p-5">
+                  <div>
+                    <p className="mb-3 px-1 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Navigate</p>
+                    <div className="overflow-hidden rounded-2xl border border-border/70 bg-muted/20 shadow-sm">
                     {menu.map((item) => renderMobileMenuItem(item))}
-                  </Accordion>
+                    </div>
+                  </div>
 
                   {isPending ? (
                     <Skeleton className="h-10 w-full" />
@@ -262,6 +262,19 @@ const UserMenu = ({
     .toUpperCase();
 
     const navigate = useNavigate();
+    const menuRef = useRef<HTMLDetailsElement>(null);
+    const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+      function closeMenu(event: PointerEvent) {
+        if (!menuRef.current?.contains(event.target as Node)) {
+          setIsOpen(false);
+        }
+      }
+
+      document.addEventListener("pointerdown", closeMenu);
+      return () => document.removeEventListener("pointerdown", closeMenu);
+    }, []);
 
   function navigateSettings() {
     navigate('/settings');
@@ -272,11 +285,16 @@ const UserMenu = ({
   }
 
   return (
-    <details className={cn("relative", mobile && "w-full")}>
+    <details
+      ref={menuRef}
+      open={isOpen}
+      onToggle={(event) => setIsOpen(event.currentTarget.open)}
+      className={cn("relative", mobile && "w-full rounded-2xl border border-border/70 bg-muted/20 p-1.5 shadow-sm")}
+    >
       <summary
         className={cn(
-          "flex cursor-pointer list-none items-center gap-2 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          mobile && "w-full justify-between border px-3 py-2",
+          "flex min-w-0 cursor-pointer list-none items-center gap-2 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          mobile && "w-full justify-between px-2.5 py-2.5",
         )}
       >
         <span className="flex size-9 items-center justify-center overflow-hidden rounded-full bg-muted text-sm font-medium">
@@ -288,16 +306,16 @@ const UserMenu = ({
             <UserRound className="size-4" />
           )}
         </span>
-        {mobile && <span className="mr-auto ml-2 text-sm font-medium">{name ?? "Account"}</span>}
+        {mobile && <span className="mr-auto ml-2 min-w-0 truncate text-sm font-medium">{name ?? "Account"}</span>}
         <ChevronDown className="size-4 text-muted-foreground" />
       </summary>
       <div className={cn(
-        "absolute right-0 z-50 mt-2 flex min-w-44 flex-col gap-1 rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
+        "absolute right-0 z-50 mt-2 flex min-w-44 flex-col gap-1 rounded-xl border bg-popover p-1.5 text-popover-foreground shadow-md",
         mobile && "static mt-2 w-full",
       )}>
-        <Button variant="ghost" className="justify-start" type="button" onClick={navigateMyAccount}>My account</Button>
+        <Button variant="ghost" className="cursor-pointer justify-start" type="button" onClick={navigateMyAccount}>My account</Button>
 
-        <Button variant="ghost" className="justify-start" type="button" onClick={navigateSettings}>Settings</Button>
+        <Button variant="ghost" className="cursor-pointer justify-start" type="button" onClick={navigateSettings}>Settings</Button>
         <Button variant="ghost" className="justify-start cursor-pointer" type="button" onClick={() => signOut()}>Logout</Button>
       </div>
     </details>
@@ -333,21 +351,22 @@ const renderMenuItem = (item: MenuItem) => {
 const renderMobileMenuItem = (item: MenuItem) => {
   if (item.items) {
     return (
-      <AccordionItem key={item.title} value={item.title} className="border-b-0">
-        <AccordionTrigger className="text-md py-0 font-semibold hover:no-underline">
+      <details key={item.title} className="group border-b last:border-b-0">
+        <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between px-4 py-3 text-[0.95rem] font-medium outline-none transition-colors hover:bg-background focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
           {item.title}
-        </AccordionTrigger>
-        <AccordionContent className="mt-2">
+          <ChevronDown className="size-4 text-muted-foreground transition-transform group-open:rotate-180" />
+        </summary>
+        <div className="flex flex-col gap-1 border-t border-border/70 bg-background/60 px-2 py-2">
           {item.items.map((subItem) => (
             <SubMenuLink key={subItem.title} item={subItem} />
           ))}
-        </AccordionContent>
-      </AccordionItem>
+        </div>
+      </details>
     );
   }
 
   return (
-    <a key={item.title} href={item.url} className="text-md font-semibold">
+    <a key={item.title} href={item.url} className="flex min-h-14 cursor-pointer items-center border-b border-border/70 px-4 py-3 text-[0.95rem] font-medium last:border-b-0 hover:bg-background">
       {item.title}
     </a>
   );
@@ -356,7 +375,7 @@ const renderMobileMenuItem = (item: MenuItem) => {
 const SubMenuLink = ({ item }: { item: MenuItem }) => {
   return (
     <a
-      className="flex min-w-80 flex-row gap-4 rounded-md p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-muted hover:text-accent-foreground"
+      className="flex min-w-0 cursor-pointer flex-row gap-3 rounded-xl p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-muted hover:text-accent-foreground"
       href={item.url}
     >
       <div className="text-foreground">{item.icon}</div>
