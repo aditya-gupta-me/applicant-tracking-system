@@ -7,7 +7,7 @@ import organizationRouter from "./routes/organization";
 import organizationAdmin from "./routes/organizationAdmin";
 
 const app: Application = express();
-const PORT: number = 3000;
+const PORT: number = process.env.PORT;
 
 // Allow all cross-origin requests
 app.use(cors({
