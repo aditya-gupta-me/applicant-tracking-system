@@ -1,5 +1,6 @@
 import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
+import { useSession } from '@repo/auth'
 import './index.css'
 import App from './App.tsx'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
@@ -13,11 +14,44 @@ import CreateOrganization from './pages/Onboarding/CreateOrganization.tsx'
 import JoinOrganization from './pages/Onboarding/JoinOrganization.tsx'
 import { NoOrganizationRequiredLayout } from './components/layout/NoOrganizationRequiredLayout.tsx'
 import { useOrganizationStore } from './store/useOrganizationStore.ts'
+import InviteMember from './pages/InviteUser.tsx'
+import { useAdminStore } from './store/useAdminStore.ts'
+import { AdminLayout } from './components/layout/AdminLayout.tsx'
 
 function OrganizationStatusBootstrap() {
+  const { data: session, isPending } = useSession();
+
   useEffect(() => {
+    if (isPending) {
+      return;
+    }
+
+    if (!session) {
+      useOrganizationStore.getState().setOrganization(null);
+      return;
+    }
+
     void useOrganizationStore.getState().checkOrganizationStatus();
-  }, []);
+  }, [isPending, session?.user.id]);
+
+  return null;
+}
+
+function AdminStatusBootstrap() {
+  const { data: session, isPending } = useSession();
+
+  useEffect(() => {
+    if (isPending) {
+      return;
+    }
+
+    if (!session) {
+      useAdminStore.getState().setAdmin(null);
+      return;
+    }
+
+    void useAdminStore.getState().checkAdminStatus();
+  }, [isPending, session?.user.id]);
 
   return null;
 }
@@ -63,12 +97,21 @@ const router = createBrowserRouter([
             path: '/onboarding/organization/create',
             element: <CreateOrganization/>
           },
-          {
-            path: '/onboarding/organization/join',
-            element: <JoinOrganization/>
-          }
         ]
       },
+      {
+        element: <AdminLayout/>,
+        children: [
+          {
+            path: '/invite-members',
+            element: <InviteMember/>
+          },
+        ]
+      },
+      {
+        path: '/invite/:inviteToken',
+        element: <JoinOrganization/>
+      }
     ]
   }
 ])
@@ -77,6 +120,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <>
       <OrganizationStatusBootstrap />
+      <AdminStatusBootstrap/>
       <RouterProvider router={router}/>
     </>
   </StrictMode>,

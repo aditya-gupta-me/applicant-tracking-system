@@ -1,15 +1,15 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useOrganizationStore } from "@/store/useOrganizationStore";
 import Loading from "../Loading";
+import { useAdminStore } from "@/store/useAdminStore";
 
-export function NoOrganizationRequiredLayout() {
-    const { organization, isLoading } = useOrganizationStore();
+export function AdminLayout() {
+    const { admin, isLoading } = useAdminStore();
 
     if(isLoading) {
         return <Loading/>;
     }
 
-    if(organization) {
+    if(!admin) {
         return <Navigate 
         to={'/dashboard'}
         replace

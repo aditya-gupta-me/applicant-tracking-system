@@ -37,5 +37,6 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
     "resolveJsonModule": true
-  }
+  },
+  "include": ["src/**/*", "environment.d.ts"]
 }

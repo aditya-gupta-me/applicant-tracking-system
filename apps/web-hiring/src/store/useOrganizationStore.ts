@@ -17,9 +17,7 @@ export const useOrganizationStore = create<OrganizationState>((set) => ({
 
     checkOrganizationStatus: async () => {
         try {
-            const response = await api.get('api/organization/user-exists');
-
-            console.log("State, org: ", response.data);
+            const response = await api.get('api/organization/user-exists-in-org');
 
             set({ organization: response.data.exists || null, isLoading: false });
         } catch (error) {

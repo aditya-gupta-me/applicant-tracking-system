@@ -1,6 +1,11 @@
 import { z } from "zod";
 
 
+enum UserRole {
+    Recruiter = "RECRUITER",
+    Hiring_Manager = "HIRING_MANAGER"
+}
+
 export const loginSchema = z.object({
     email: z.email("Please enter a valid email address"),
     password: z.string().refine(
@@ -30,6 +35,13 @@ export const createOrganizationSchema = z.object({
     })
 })
 
+export const inviteUserInOrganizationSchema = z.object({
+    email: z.email("Please enter a valid email address"),
+    role: z.enum(UserRole)
+})
+
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type OrganizationInput = z.infer<typeof createOrganizationSchema>;
+export type InviteUserInput = z.infer<typeof inviteUserInOrganizationSchema>;
