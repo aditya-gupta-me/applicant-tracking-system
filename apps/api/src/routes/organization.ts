@@ -306,4 +306,80 @@ organizationRouter.post('/join', protectedRoute, async (req: Request, res: Respo
 
 })
 
+organizationRouter.get('/team-members', protectedRoute, async (req: Request, res: Response) => {
+    console.log(req.method, req.baseUrl + req.path);
+
+    const adminId = req.user?.id;
+
+    if(!adminId) {
+        return res.status(411).json({
+            error: 'Unauthorized'
+        });
+    }
+
+
+    // find the admin's
+    // org that they belong to
+    const orgId = await prisma.organization.findFirst({
+        where: {
+            adminId: adminId
+        }
+    })
+
+
+    // find all the users
+    // who belong to same org as admin's org
+    const getUsers = await prisma.organizationMember.findMany({
+        where: {
+            orgId: orgId?.id
+        }
+    })
+
+    const users = [];
+
+    for(let i=0; i<getUsers.length; i++) {
+        const getUserDetails = await prisma.user.findFirst({
+            where: {
+                id: getUsers[i]?.userId
+            }
+        })
+
+        users.push({
+            id: getUserDetails?.id,
+            name: getUserDetails?.name,
+            email: getUserDetails?.email,
+            role: getUsers[i]?.role,
+            status: 'Active'
+        })
+    }
+
+    const invitedUsers = await prisma.organizationInvite.findMany({
+        where: {
+            orgId: orgId?.id,
+            status: 'PENDING',
+            expiresAt: { gt: new Date() }
+        }
+    })
+
+    for(let i=0; i<invitedUsers.length; i++) {
+        const getUserDetails = await prisma.user.findFirst({
+            where: {
+                email: invitedUsers[i]?.email
+            }
+        })
+
+        users.push({
+            id: getUserDetails?.id,
+            name: getUserDetails?.name,
+            email: getUserDetails?.email,
+            role: invitedUsers[i]?.role,
+            status: 'Invited'
+        })
+    }
+
+    return res.status(200).json({
+        users
+    });
+})
+
 export default organizationRouter;
