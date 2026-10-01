@@ -17,6 +17,7 @@ import { useOrganizationStore } from './store/useOrganizationStore.ts'
 import InviteMember from './pages/InviteUser.tsx'
 import { useAdminStore } from './store/useAdminStore.ts'
 import { AdminLayout } from './components/layout/AdminLayout.tsx'
+import Organization from './pages/Organization.tsx'
 
 function OrganizationStatusBootstrap() {
   const { data: session, isPending } = useSession();
@@ -111,6 +112,10 @@ const router = createBrowserRouter([
       {
         path: '/invite/:inviteToken',
         element: <JoinOrganization/>
+      },
+      {
+        path: '/organization',
+        element: <Organization/>
       }
     ]
   }

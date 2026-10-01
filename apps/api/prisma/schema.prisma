@@ -37,6 +37,7 @@ enum OrganizationInviteStatus {
   PENDING
   ACCEPTED
   REVOKED
+  EXPIRED
 }
 
 

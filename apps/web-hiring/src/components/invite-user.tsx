@@ -1,6 +1,6 @@
 "use client";
 
-import { CornerDownLeft, UserRoundPlus } from "lucide-react";
+import { CheckCircle2, Clock3, CornerDownLeft, Users, UserRoundPlus } from "lucide-react";
 import { cn } from "cn";
 
 import { Button } from "@repo/ui/components/button";
@@ -32,33 +32,27 @@ import { Controller, useForm } from "react-hook-form";
 import { inviteUserInOrganizationSchema, type InviteUserInput } from "@repo/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/api/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
+import { useTeamMembersStore, type TeamMember } from "@/store/useTeamMembersStore";
 interface InviteUserProps {
   heading?: string;
   className?: string;
 }
 
+type MemberFilter = "All" | TeamMember["status"];
+
 const InviteUser = ({
   heading = "Invite Users",
   className,
 }: InviteUserProps) => {
-  const users = [
-    {
-      id: 1,
-      name: "Sarah Johnson",
-      email: "sarah.j@company.com",
-      role: "Administrator",
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Michael Chen",
-      email: "m.chen@company.com",
-      role: "Collaborator",
-      status: "Invited",
-    },
-  ];
+
+  const [memberFilter, setMemberFilter] = useState<MemberFilter>("All");
+  const { teamMembers, isLoading, getTeamMembers } = useTeamMembersStore();
+
+  useEffect(() => {
+    void getTeamMembers();
+  }, [getTeamMembers]);
 
   const {
     control,
@@ -84,6 +78,8 @@ const InviteUser = ({
         role: data.role
       })
 
+      setError("");
+      await getTeamMembers();
       alert(res.data.message);
     } catch(error: unknown) {
       if (axios.isAxiosError<{ error?: { message?: string } }>(error)) {
@@ -94,16 +90,30 @@ const InviteUser = ({
     }
   }
 
+  const activeUsers = teamMembers?.filter((user) => user.status === "Active");
+  const invitedUsers = teamMembers?.filter((user) => user.status === "Invited");
+  const visibleUsers = memberFilter === "All"
+    ? teamMembers
+    : teamMembers?.filter((user) => user.status === memberFilter);
+
+  function formatRole(role: string) {
+    return role
+      .toLowerCase()
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
+
   return (
-    <section className="bg-muted/30 px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
-      <div className="container mx-auto flex max-w-5xl flex-col gap-6">
+    <section className="px-0 py-0">
+      <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
-              Team Members
+              Team directory
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Manage and invite users to your team
+              See who is already part of your organization and who is still being onboarded.
             </p>
           </div>
           <Dialog>
@@ -174,7 +184,50 @@ const InviteUser = ({
             </DialogContent>
           </Dialog>
         </div>
-        <div className="overflow-x-auto rounded-lg border bg-background shadow-sm">
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Everyone</span>
+              <Users className="size-4 text-muted-foreground" />
+            </div>
+            <p className="mt-3 font-heading text-3xl font-semibold">{teamMembers?.length}</p>
+          </div>
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 shadow-sm dark:border-emerald-900 dark:bg-emerald-950/20">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-emerald-800 dark:text-emerald-300">Joined</span>
+              <CheckCircle2 className="size-4 text-emerald-600" />
+            </div>
+            <p className="mt-3 font-heading text-3xl font-semibold text-emerald-900 dark:text-emerald-200">{activeUsers?.length}</p>
+          </div>
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 shadow-sm dark:border-amber-900 dark:bg-amber-950/20">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-amber-800 dark:text-amber-300">Pending invites</span>
+              <Clock3 className="size-4 text-amber-600" />
+            </div>
+            <p className="mt-3 font-heading text-3xl font-semibold text-amber-900 dark:text-amber-200">{invitedUsers?.length}</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {(["All", "Active", "Invited"] as const).map((filter) => (
+            <Button
+              key={filter}
+              type="button"
+              size="sm"
+              variant={memberFilter === filter ? "secondary" : "ghost"}
+              className="cursor-pointer"
+              onClick={() => setMemberFilter(filter)}
+            >
+              {filter === "Active" ? "Joined" : filter === "Invited" ? "Pending invites" : filter}
+              <span className="ml-1 text-xs text-muted-foreground">
+                {filter === "All" ? teamMembers?.length : filter === "Active" ? activeUsers?.length : invitedUsers?.length}
+              </span>
+            </Button>
+          ))}
+        </div>
+
+        <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
           <Table className="min-w-160">
             <TableHeader>
               <TableRow>
@@ -185,14 +238,38 @@ const InviteUser = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
+              {isLoading && (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-28 text-center text-sm text-muted-foreground">
+                    Loading team members...
+                  </TableCell>
+                </TableRow>
+              )}
+              {!isLoading && visibleUsers.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.role}</TableCell>
-                  <TableCell>{user.status}</TableCell>
+                  <TableCell>{formatRole(user.role)}</TableCell>
+                  <TableCell>
+                    <span className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
+                      user.status === "Active"
+                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+                        : "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300",
+                    )}>
+                      {user.status === "Active" ? <CheckCircle2 className="size-3.5" /> : <Clock3 className="size-3.5" />}
+                      {user.status === "Active" ? "Joined" : "Pending invite"}
+                    </span>
+                  </TableCell>
                 </TableRow>
               ))}
+              {!isLoading && visibleUsers.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-28 text-center text-sm text-muted-foreground">
+                    {memberFilter === "Invited" ? "No pending invitations." : "No joined members yet."}
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
