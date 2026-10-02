@@ -23,7 +23,7 @@ export default function InviteMember() {
                 items={[
                     { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
                     ...(admin ? [{ label: "Invite team members", href: "/invite-members", icon: UserPlus }] : []),
-                    { label: "Organization", href: "/dashboard#organization", icon: Building2 },
+                    { label: "Organization", href: "/organization", icon: Building2 },
                 ]}
             />
             <SidebarInset>
