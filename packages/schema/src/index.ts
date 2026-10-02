@@ -40,8 +40,15 @@ export const inviteUserInOrganizationSchema = z.object({
     role: z.enum(UserRole)
 })
 
+export const updateOrganizationSchema = z.object({
+    image: z.url().optional(),
+    email: z.email("Please enter a valid email address"),
+    website: z.url("Invalid URL layout")
+})
+
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type OrganizationInput = z.infer<typeof createOrganizationSchema>;
 export type InviteUserInput = z.infer<typeof inviteUserInOrganizationSchema>;
+export type UpdateOrganizationInput = z.infer<typeof updateOrganizationSchema>;
