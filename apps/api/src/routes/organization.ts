@@ -1,9 +1,9 @@
 import express, { Router, Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import { protectedRoute } from "../middleware/auth.middleware";
-import { z } from "zod";
+import { z, email } from 'zod';
 import slugify from "slugify";
-import { createOrganizationSchema, inviteUserInOrganizationSchema } from '@repo/schema';
+import { createOrganizationSchema, inviteUserInOrganizationSchema, updateOrganizationSchema } from '@repo/schema';
 import { randomShortId } from "../utils/slugGenerator";
 import generateRandomSecretKey from "../utils/keyGen";
 import { sendEmail } from "../utils/emailService";
@@ -380,6 +380,102 @@ organizationRouter.get('/team-members', protectedRoute, async (req: Request, res
     return res.status(200).json({
         users
     });
+})
+
+
+organizationRouter.get('/details', protectedRoute, async (req: Request, res: Response) => {
+    console.log(req.method, req.baseUrl + req.path);
+
+    const userId: string | undefined = req.user?.id;
+
+    if(!userId) {
+        return res.status(411).json({
+            error: 'Unauthorized'
+        })
+    }
+
+    const organization = await prisma.organizationMember.findFirst({
+        where: {
+            userId: userId
+        }
+    })
+
+    if(!organization) {
+        return res.status(200).json({
+            message: 'Please join an organization.'
+        })
+    }
+
+    const orgId = organization?.orgId;
+
+    const organizationDetails = await prisma.organization.findFirst({
+        where: {
+            id: orgId
+        }
+    })
+
+    return res.status(200).json({
+        org: {
+            image: organizationDetails?.image,
+            name: organizationDetails?.name,
+            email: organizationDetails?.email,
+            website: organizationDetails?.website,
+            foundedOn: organizationDetails?.establishedDate
+        }
+    })
+})
+
+organizationRouter.post('/update', protectedRoute, async (req: Request, res: Response) => {
+    console.log(req.method, req.baseUrl + req.path);
+
+
+    const adminId: string | undefined = req.user?.id;
+    const body = updateOrganizationSchema.safeParse(req.body);
+
+    if(!adminId) {
+        return res.status(411).json({
+            error: 'Unauthorized'
+        })
+    }
+
+    const org = await prisma.organizationMember.findFirst({
+        where: {
+            userId: adminId
+        }
+    })
+
+    const orgId = org?.orgId;
+
+    if(!body.success) {
+        return res.status(409).json({
+            error: body.error.message
+        })
+    }
+
+    try {
+        await prisma.organization.update({
+            where: {
+                id: orgId
+            },
+            data: {
+                name: body.data.name,
+                email: body.data.email,
+                image: body.data.image,
+                website: body.data.website,
+                establishedDate: body.data.establishedDate
+            }
+        })
+
+        return res.status(200).json({
+            message: 'Organization details updated successfully'
+        })
+
+    } catch(error) {
+        console.error(error);
+        return res.status(403).json({
+            error: error
+        })
+    }  
 })
 
 export default organizationRouter;
