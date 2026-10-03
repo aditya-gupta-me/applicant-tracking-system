@@ -1,17 +1,78 @@
 import { useSession } from "@repo/auth";
-import { Building2, LayoutDashboard, UserPlus } from "lucide-react";
+import { Building2, CalendarDays, Globe, LayoutDashboard, Mail, UserPlus } from "lucide-react";
+import { Link } from "react-router-dom";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@repo/ui/components/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useAdminStore } from "@/store/useAdminStore";
+import { useEffect, useState } from "react";
+import { api } from "@/api/api";
+import { Button } from "@repo/ui/components/button";
+import { useOrganizationStore, type OrganizationDetails } from "@/store/useOrganizationStore";
+
 
 export default function Organization() {
     const { data: session } = useSession();
     const user = session?.user;
     const { admin } = useAdminStore();
+    const { details, setOrganizationDetails } = useOrganizationStore();
+
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        async function getOrganizationDetails() {
+            try {
+                const res = await api.get("api/organization/details");
+                if (isMounted) {
+                    const organization: OrganizationDetails = {
+                        name: res.data.org?.name ?? "",
+                        image: res.data.org?.image ?? null,
+                        email: res.data.org?.email ?? null,
+                        website: res.data.org?.website ?? null,
+                        foundedOn: res.data.org?.foundedOn ?? null,
+                    };
+                    setOrganizationDetails(organization);
+                }
+            } catch {
+                if (isMounted) {
+                    setError("We couldn't load your organization details. Please try again.");
+                }
+            } finally {
+                if (isMounted) {
+                    setIsLoading(false);
+                }
+            }
+        }
+
+        void getOrganizationDetails();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     if (!user) {
         return null;
     }
+
+    const organization = details ?? {
+        name: "",
+        image: null,
+        email: null,
+        website: null,
+        foundedOn: null,
+    };
+    const parsedFoundedDate = organization.foundedOn ? new Date(organization.foundedOn) : null;
+    const foundedDate = parsedFoundedDate && !Number.isNaN(parsedFoundedDate.getTime())
+        ? parsedFoundedDate.toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        })
+        : "Not provided";
+    const organizationInitial = organization.name.trim().charAt(0).toUpperCase() || "O";
 
     return (
         <SidebarProvider>
@@ -41,18 +102,74 @@ export default function Organization() {
                         </div>
 
                         <section className="mt-8 rounded-2xl border border-border bg-card p-6 shadow-sm md:p-8">
-                            <div className="flex items-start gap-4">
-                                <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                                    <Building2 className="size-6" />
-                                </div>
-                                <div>
-                                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Current workspace</p>
-                                    <h2 className="mt-2 font-heading text-2xl font-semibold tracking-tight">Your workspace</h2>
-                                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                                        You are signed in as {user.email}.
-                                    </p>
-                                </div>
-                            </div>
+                            {isLoading ? (
+                                <p className="text-sm text-muted-foreground">Loading organization details...</p>
+                            ) : error ? (
+                                <p className="text-sm text-destructive">{error}</p>
+                            ) : (
+                                <>
+                                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                                        {organization.image ? (
+                                            <img
+                                                src={organization.image}
+                                                alt={`${organization.name} logo`}
+                                                className="size-20 rounded-2xl border border-border object-cover"
+                                            />
+                                        ) : (
+                                            <div className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-2xl font-semibold text-primary">
+                                                {organizationInitial}
+                                            </div>
+                                        )}
+                                        <div>
+                                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Current workspace</p>
+                                            <h2 className="mt-2 font-heading text-2xl font-semibold tracking-tight">
+                                                {organization.name || "Unnamed organization"}
+                                            </h2>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-8 grid gap-4 border-t border-border pt-6 sm:grid-cols-2">
+                                        <div className="flex items-start gap-3">
+                                            <Mail className="mt-0.5 size-5 shrink-0 text-primary" />
+                                            <div>
+                                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Email</p>
+                                                <p className="mt-1 break-all text-sm">{organization.email || "Not provided"}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-3">
+                                            <Globe className="mt-0.5 size-5 shrink-0 text-primary" />
+                                            <div>
+                                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Website</p>
+                                                {organization.website ? (
+                                                    <a
+                                                        href={organization.website}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="mt-1 block break-all text-sm text-primary underline-offset-4 hover:underline"
+                                                    >
+                                                        {organization.website}
+                                                    </a>
+                                                ) : (
+                                                    <p className="mt-1 text-sm">Not provided</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-3">
+                                            <CalendarDays className="mt-0.5 size-5 shrink-0 text-primary" />
+                                            <div>
+                                                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Founded on</p>
+                                                <p className="mt-1 text-sm">{foundedDate}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="mt-8 flex justify-end border-t border-border pt-6">
+                                    {admin && 
+                                    <Button render={<Link to="/organization/update" />} nativeButton={false}>
+                                        Update details
+                                    </Button>}
+                                    </div>
+                                </>
+                            )}
                         </section>
                     </div>
                 </main>
