@@ -41,9 +41,11 @@ export const inviteUserInOrganizationSchema = z.object({
 })
 
 export const updateOrganizationSchema = z.object({
+    name: z.string().min(1, "Organization name is required"),
     image: z.url().optional(),
     email: z.email("Please enter a valid email address"),
-    website: z.url("Invalid URL layout")
+    website: z.url("Invalid URL layout"),
+    establishedDate: z.coerce.date()
 })
 
 
