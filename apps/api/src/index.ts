@@ -5,6 +5,7 @@ import { auth } from './lib/auth';
 import cors from 'cors';
 import organizationRouter from "./routes/organization";
 import organizationAdmin from "./routes/organizationAdmin";
+import userRouter from "./routes/user";
 
 const app: Application = express();
 const PORT: number = process.env.PORT;
@@ -32,6 +33,9 @@ app.use('/api/organization', organizationRouter);
 
 // organization-Admin
 app.use('/api/organization/admin', organizationAdmin);
+
+// user-account router
+app.use('/api/user', userRouter);
 
 // base endpoint
 app.get('/', (req: Request, res: Response) => {
