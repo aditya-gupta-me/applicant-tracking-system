@@ -19,6 +19,7 @@ import { useAdminStore } from './store/useAdminStore.ts'
 import { AdminLayout } from './components/layout/AdminLayout.tsx'
 import Organization from './pages/Organization.tsx'
 import UpdateOrganization from './pages/UpdateOrganization.tsx'
+import UserAccount from './pages/User/UserAccount.tsx'
 
 function OrganizationStatusBootstrap() {
   const { data: session, isPending } = useSession();
@@ -121,6 +122,10 @@ const router = createBrowserRouter([
       {
         path: '/organization',
         element: <Organization/>
+      },
+      {
+        path: '/account',
+        element: <UserAccount/>
       }
     ]
   }
