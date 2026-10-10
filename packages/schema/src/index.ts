@@ -83,20 +83,14 @@ export const createJobPostingSchema = z.object({
 
 export const createSkillCategorySchema = z.object({
     categoryName: z.string().trim().min(1, "Skill category name is required"),
-    description: z.string().trim().min(1, "Skill category description is missing").optional(),
+    description: z.string().trim().min(1, "Skill category description is missing").or(z.literal("")).optional(),
     createdAt: z.coerce.date()
-    .refine((date) => date >= new Date(), {
-        error: "Date cannot be set in the past"
-    })
 })
 
 export const createSkillsSchema = z.object({
     name: z.string().trim().min(1, "Skill name is required"),
     isActive: z.boolean(),
-    createdAt: z.coerce.date()
-    .refine((date) => date >= new Date(), {
-        error: "Date cannot be set in the past"
-    }),
+    createdAt: z.coerce.date(),
     categoryId: z.string().trim().min(1, "Category ID is required")
 })
 
