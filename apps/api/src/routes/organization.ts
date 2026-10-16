@@ -1,7 +1,7 @@
 import express, { Router, Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import { protectedRoute } from "../middleware/auth.middleware";
-import { z, email } from 'zod';
+import { z } from 'zod';
 import slugify from "slugify";
 import { createOrganizationSchema, inviteUserInOrganizationSchema, updateOrganizationSchema } from '@repo/schema';
 import { randomShortId } from "../utils/slugGenerator";
