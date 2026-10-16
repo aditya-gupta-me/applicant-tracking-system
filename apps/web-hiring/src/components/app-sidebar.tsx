@@ -12,9 +12,10 @@ import {
 } from "@repo/ui/components/sidebar"
 import { signOut } from "@repo/auth"
 import { Button } from "@repo/ui/components/button"
-import { Building2, ChevronDown, LayoutDashboard, LogOut, Settings, UserRound } from "lucide-react"
+import { BriefcaseBusiness, Building2, ChevronDown, LayoutDashboard, LogOut, UserPlus, UserRound } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useEffect, useRef, useState } from "react"
+import { useAdminStore } from "@/store/useAdminStore"
 
 type SidebarItem = {
   label: string
@@ -34,6 +35,7 @@ type AppSidebarProps = {
 export function AppSidebar({ user, organizationName, items }: AppSidebarProps) {
   const location = useLocation()
   const navigate = useNavigate()
+  const { admin } = useAdminStore()
   const accountMenuRef = useRef<HTMLDetailsElement>(null)
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false)
   const initials = user.name
@@ -42,6 +44,12 @@ export function AppSidebar({ user, organizationName, items }: AppSidebarProps) {
     .join("")
     .slice(0, 2)
     .toUpperCase()
+
+  const navigationItems = [
+    ...items,
+    ...(admin ? [{ label: "Invite team members", href: "/invite-members", icon: UserPlus }] : []),
+    { label: "Manage job postings", href: "/job-posting", icon: BriefcaseBusiness },
+  ].filter((item, index, allItems) => allItems.findIndex((candidate) => candidate.href === item.href) === index)
 
   useEffect(() => {
     function closeAccountMenu(event: PointerEvent) {
@@ -72,14 +80,18 @@ export function AppSidebar({ user, organizationName, items }: AppSidebarProps) {
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => {
+              {navigationItems.map((item) => {
                 const Icon = item.icon
 
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       render={<Link to={item.href} />}
-                      isActive={location.pathname === item.href}
+                      isActive={
+                        location.pathname === item.href ||
+                        (item.href === "/job-posting" &&
+                          (location.pathname.startsWith("/job-posting/") || location.pathname.startsWith("/skills/")))
+                      }
                       tooltip={item.label}
                       className="cursor-pointer"
                     >
@@ -119,15 +131,6 @@ export function AppSidebar({ user, organizationName, items }: AppSidebarProps) {
             >
               <UserRound />
               My account
-            </Button>
-            <Button
-              variant="ghost"
-              className="cursor-pointer justify-start gap-2"
-              type="button"
-              onClick={() => navigate("/settings")}
-            >
-              <Settings />
-              Settings
             </Button>
             <Button
               variant="ghost"

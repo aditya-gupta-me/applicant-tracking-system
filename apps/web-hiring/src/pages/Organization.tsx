@@ -1,5 +1,5 @@
 import { useSession } from "@repo/auth";
-import { Building2, CalendarDays, Globe, LayoutDashboard, Mail, UserPlus } from "lucide-react";
+import { Building2, CalendarDays, ChevronRight, Globe, LayoutDashboard, Mail, Plus, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@repo/ui/components/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/api/api";
 import { Button } from "@repo/ui/components/button";
 import { useOrganizationStore, type OrganizationDetails } from "@/store/useOrganizationStore";
+import { useDepartmentStore } from "@/store/useDepartmentStore";
 
 
 export default function Organization() {
@@ -15,6 +16,7 @@ export default function Organization() {
     const user = session?.user;
     const { admin } = useAdminStore();
     const { details, setOrganizationDetails } = useOrganizationStore();
+    const { departments, getDepartments, isLoading: isLoadingDepartments, error: departmentsError } = useDepartmentStore();
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -52,6 +54,10 @@ export default function Organization() {
             isMounted = false;
         };
     }, []);
+
+    useEffect(() => {
+        void getDepartments();
+    }, [getDepartments]);
 
     if (!user) {
         return null;
@@ -163,12 +169,73 @@ export default function Organization() {
                                         </div>
                                     </div>
                                     <div className="mt-8 flex justify-end border-t border-border pt-6">
-                                    {admin && 
-                                    <Button render={<Link to="/organization/update" />} nativeButton={false}>
-                                        Update details
-                                    </Button>}
+                                    {admin && (
+                                        <Button render={<Link to="/organization/update" />} nativeButton={false}>
+                                            Update details
+                                        </Button>
+                                    )}
                                     </div>
                                 </>
+                            )}
+                        </section>
+
+                        {admin && (
+                            <section className="group mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-colors hover:border-primary/40">
+                                <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between md:p-8">
+                                    <div className="flex items-start gap-4">
+                                        <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                            <Building2 aria-hidden="true" className="size-6" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Hiring structure</p>
+                                            <h2 className="mt-2 text-xl font-semibold tracking-tight">Organize your departments</h2>
+                                            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+                                                Create departments like Engineering, Marketing, or Finance so job postings stay easy to organize.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        render={<Link to="/organization/department/create" />}
+                                        nativeButton={false}
+                                        size="lg"
+                                        className="w-full sm:w-auto"
+                                    >
+                                        <Plus aria-hidden="true" />
+                                        Add a department
+                                        <ChevronRight aria-hidden="true" />
+                                    </Button>
+                                </div>
+                            </section>
+                        )}
+
+                        <section className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-sm md:p-8">
+                            <div className="flex items-center justify-between gap-4">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Hiring structure</p>
+                                    <h2 className="mt-2 text-xl font-semibold tracking-tight">Departments</h2>
+                                </div>
+                                <span className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground">
+                                    {departments.length}
+                                </span>
+                            </div>
+                            {departmentsError ? (
+                                <p className="mt-6 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive" role="alert">
+                                    {departmentsError}
+                                </p>
+                            ) : isLoadingDepartments ? (
+                                <p className="mt-6 text-sm text-muted-foreground">Loading departments...</p>
+                            ) : departments.length > 0 ? (
+                                <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                    {departments.map((department) => (
+                                        <div key={department.id} className="rounded-xl border border-border/80 bg-muted/20 px-4 py-3">
+                                            <p className="font-medium">{department.name}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="mt-6 rounded-xl border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
+                                    No departments have been created yet.
+                                </p>
                             )}
                         </section>
                     </div>

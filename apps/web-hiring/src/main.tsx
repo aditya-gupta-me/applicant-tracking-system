@@ -14,12 +14,16 @@ import CreateOrganization from './pages/Onboarding/CreateOrganization.tsx'
 import JoinOrganization from './pages/Onboarding/JoinOrganization.tsx'
 import { NoOrganizationRequiredLayout } from './components/layout/NoOrganizationRequiredLayout.tsx'
 import { useOrganizationStore } from './store/useOrganizationStore.ts'
-import InviteMember from './pages/InviteUser.tsx'
+import InviteMember from './pages/Admin/InviteUser.tsx'
 import { useAdminStore } from './store/useAdminStore.ts'
 import { AdminLayout } from './components/layout/AdminLayout.tsx'
 import Organization from './pages/Organization.tsx'
-import UpdateOrganization from './pages/UpdateOrganization.tsx'
+import UpdateOrganization from './pages/Admin/UpdateOrganization.tsx'
 import UserAccount from './pages/User/UserAccount.tsx'
+import CreateDepartment from './pages/Admin/CreateDepartment.tsx'
+import ManageSkills from './pages/Job Posting/ManageSkills.tsx'
+import JobPosting from './pages/Job Posting/JobPosting.tsx'
+import CreateJobPosting from './pages/Job Posting/CreateJobPosting.tsx'
 
 function OrganizationStatusBootstrap() {
   const { data: session, isPending } = useSession();
@@ -102,6 +106,7 @@ const router = createBrowserRouter([
           },
         ]
       },
+      // Admin Layout
       {
         element: <AdminLayout/>,
         children: [
@@ -112,6 +117,10 @@ const router = createBrowserRouter([
           {
             path: '/organization/update',
             element: <UpdateOrganization/>
+          },
+          {
+            path: '/organization/department/create',
+            element: <CreateDepartment/>
           }
         ]
       },
@@ -126,6 +135,18 @@ const router = createBrowserRouter([
       {
         path: '/account',
         element: <UserAccount/>
+      },
+      {
+        path: '/job-posting',
+        element: <JobPosting/>
+      },
+      {
+        path: '/job-posting/create',
+        element: <CreateJobPosting/>
+      },
+      {
+        path: '/skills/manage',
+        element: <ManageSkills/>
       }
     ]
   }
