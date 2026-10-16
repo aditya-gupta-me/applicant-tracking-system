@@ -132,6 +132,8 @@ model Organization {
   departments     Department[]
   locations        Location[]
   jobs            Job[]
+  skillCategories SkillCategory[]
+  skills          Skill[]
   organizationMembers     OrganizationMember[]
   organizationInvites     OrganizationInvite[]
 
@@ -332,16 +334,21 @@ model CandidateSkill {
 
 
 model SkillCategory {
-  id                  String     @id @default(uuid())
+  id                  String       @id @default(uuid())
   categoryName        String
   description         String?
 
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  organizationId      String
+  organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   skills              Skill[]
 
-  @@unique([categoryName])
+  @@unique([organizationId, categoryName])
+  @@unique([organizationId, id])
+  @@index([organizationId])
   @@map("skill_category")
 }
 
@@ -356,13 +363,16 @@ model Skill {
   updatedAt           DateTime       @updatedAt
 
   categoryId          String
-  category            SkillCategory @relation(fields: [categoryId], references: [id])
+  category            SkillCategory @relation(fields: [organizationId, categoryId], references: [organizationId, id])
+  organizationId      String
+  organization        Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   candidateSkills     CandidateSkill[]
   jobSkills           JobSkill[]
 
-  @@unique([normalizedName])
+  @@unique([organizationId, normalizedName])
   @@index([categoryId])
+  @@index([organizationId])
   @@map("skill")
 }
 

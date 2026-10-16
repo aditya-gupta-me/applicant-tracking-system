@@ -5,6 +5,10 @@ import { auth } from './lib/auth';
 import cors from 'cors';
 import organizationRouter from "./routes/organization";
 import organizationAdmin from "./routes/organizationAdmin";
+import userRouter from "./routes/user";
+import departmentRouter from "./routes/department";
+import skillsRouter from "./routes/skills";
+import jobPostingRouter from "./routes/job-posting";
 
 const app: Application = express();
 const PORT: number = process.env.PORT;
@@ -32,6 +36,18 @@ app.use('/api/organization', organizationRouter);
 
 // organization-Admin
 app.use('/api/organization/admin', organizationAdmin);
+
+// user-account router
+app.use('/api/user', userRouter);
+
+// department router
+app.use('/api/department', departmentRouter);
+
+// skills router
+app.use('/api/skill', skillsRouter);
+
+// job posting router
+app.use('/api/job-posting', jobPostingRouter);
 
 // base endpoint
 app.get('/', (req: Request, res: Response) => {
