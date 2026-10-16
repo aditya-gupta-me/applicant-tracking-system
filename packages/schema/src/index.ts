@@ -14,6 +14,19 @@ enum JobType {
     Temporary = "TEMPORARY",
 }
 
+
+type SkillOption = {
+    id: string;
+    name: string;
+    categoryName: string;
+};
+
+type SelectedSkill = SkillOption & {
+    isRequired: boolean;
+    importance: number;
+    minimumYearsExperience: number;
+};
+
 export const loginSchema = z.object({
     email: z.email("Please enter a valid email address"),
     password: z.string().refine(
@@ -64,6 +77,15 @@ export const getDepartmentsSchema = z.object({
     orgId: z.string().min(1, "Organization Id is required")
 })
 
+const SelectedSkillSchema: z.ZodType<SelectedSkill> = z.object({
+    id: z.string().trim().min(1, "Skill Id is required"),
+    name: z.string().trim().min(1, "Skill name is is required"),
+    categoryName: z.string().trim().min(1, "Category name is required"),
+    isRequired: z.boolean(),
+    importance: z.number().int().min(1).max(5),
+    minimumYearsExperience: z.number().int().min(0).max(5)
+});
+
 export const createJobPostingSchema = z.object({
     title: z.string().trim().min(1, 'Job title is required'),
     description: z.string().trim().min(1, "Job description is required"),
@@ -78,7 +100,7 @@ export const createJobPostingSchema = z.object({
     }),
     type: z.enum(JobType),
     departmentId: z.string().trim().min(1, "Department ID is required"),
-    organizationId: z.string().trim().min(1, "Organization ID is required")
+    selectedSkill: SelectedSkillSchema.array(),
 })
 
 export const createSkillCategorySchema = z.object({
