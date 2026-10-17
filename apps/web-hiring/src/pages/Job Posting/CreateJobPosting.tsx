@@ -85,6 +85,7 @@ export default function CreateJobPosting() {
 
     const {
         register,
+        reset,
         handleSubmit,
         setValue,
         formState: { errors, isSubmitting }
@@ -145,6 +146,11 @@ export default function CreateJobPosting() {
                 selectedSkill: data.selectedSkill
             })
 
+            alert('Job Posting created!');
+            setSelectedSkills([]);
+            setSelectedSkillId("");
+            reset({ selectedSkill: [] });
+            // LOG
             console.log(response);
         } catch (error) {
             console.error("ERROR: ", error);
