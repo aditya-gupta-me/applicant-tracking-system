@@ -24,6 +24,7 @@ import CreateDepartment from './pages/Admin/CreateDepartment.tsx'
 import ManageSkills from './pages/Job Posting/ManageSkills.tsx'
 import JobPosting from './pages/Job Posting/JobPosting.tsx'
 import CreateJobPosting from './pages/Job Posting/CreateJobPosting.tsx'
+import JobPostingDetail from './pages/Job Posting/JobPostingDetail.tsx'
 
 function OrganizationStatusBootstrap() {
   const { data: session, isPending } = useSession();
@@ -139,6 +140,10 @@ const router = createBrowserRouter([
       {
         path: '/job-posting',
         element: <JobPosting/>
+      },
+      {
+        path: '/job-posting/:jobId',
+        element: <JobPostingDetail/>
       },
       {
         path: '/job-posting/create',

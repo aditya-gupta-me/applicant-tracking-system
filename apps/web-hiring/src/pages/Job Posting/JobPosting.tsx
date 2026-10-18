@@ -1,35 +1,49 @@
+import { useEffect, useState } from "react";
 import { useSession } from "@repo/auth";
-import { BriefcaseBusiness, Building2, CalendarDays, LayoutDashboard, MapPin, Plus } from "lucide-react";
+import { BriefcaseBusiness, Building2, LayoutDashboard, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { Button } from "@repo/ui/components/button";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@repo/ui/components/sidebar";
-
-type JobPostingSummary = {
-    id: string;
-    title: string;
-    departmentName: string;
-    location: string | null;
-    type: "FULL_TIME" | "INTERNSHIP" | "CONTRACT" | "PART_TIME" | "TEMPORARY";
-    applyBy: string | null;
-    skillCount: number;
-};
-
-const jobTypeLabels: Record<JobPostingSummary["type"], string> = {
-    FULL_TIME: "Full-time",
-    PART_TIME: "Part-time",
-    CONTRACT: "Contract",
-    INTERNSHIP: "Internship",
-    TEMPORARY: "Temporary",
-};
+import { api } from "@/api/api";
+import { JobPostingCard } from "@repo/ui/components/job-posting-card";
+import type { JobPosting } from "./job-posting-types";
 
 export default function JobPosting() {
     const { data: session } = useSession();
     const user = session?.user;
+    const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // Replace this with the organization-scoped job postings API response.
-    const jobPostings: JobPostingSummary[] = [];
+    useEffect(() => {
+        let isMounted = true;
+
+        async function loadJobPostings() {
+            try {
+                const response = await api.get<{ jobs: JobPosting[] }>("api/job-posting/get");
+                if (isMounted) {
+                    setJobPostings(response.data.jobs);
+                }
+            } catch (requestError) {
+                console.error("Unable to load job postings:", requestError);
+                if (isMounted) {
+                    setError("We couldn't load job postings. Please try again.");
+                }
+            } finally {
+                if (isMounted) {
+                    setIsLoading(false);
+                }
+            }
+        }
+
+        void loadJobPostings();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     if (!user) {
         return null;
@@ -68,40 +82,30 @@ export default function JobPosting() {
                             </Button>
                         </div>
 
-                        {jobPostings.length > 0 ? (
+                        {isLoading ? (
+                            <section className="mt-8 rounded-2xl border border-border bg-card px-6 py-14 text-center shadow-sm">
+                                <p className="text-sm text-muted-foreground">Loading job postings...</p>
+                            </section>
+                        ) : error ? (
+                            <section className="mt-8 rounded-2xl border border-destructive/30 bg-card px-6 py-14 text-center shadow-sm">
+                                <p className="text-sm text-destructive" role="alert">{error}</p>
+                            </section>
+                        ) : jobPostings.length > 0 ? (
                             <div className="mt-8 grid gap-4 md:grid-cols-2">
                                 {jobPostings.map((job) => (
-                                    <article key={job.id} className="rounded-2xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md">
-                                        <div className="flex items-start justify-between gap-4">
-                                            <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                                <BriefcaseBusiness aria-hidden="true" className="size-5" />
-                                            </div>
-                                            <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                                                Open
-                                            </span>
-                                        </div>
-                                        <h2 className="mt-6 text-lg font-semibold">{job.title}</h2>
-                                        <p className="mt-1 text-sm text-muted-foreground">{job.departmentName}</p>
-                                        <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                                            <span className="inline-flex items-center gap-1.5">
-                                                <BriefcaseBusiness className="size-4" aria-hidden="true" />
-                                                {jobTypeLabels[job.type]}
-                                            </span>
-                                            {job.location && (
-                                                <span className="inline-flex items-center gap-1.5">
-                                                    <MapPin className="size-4" aria-hidden="true" />
-                                                    {job.location}
-                                                </span>
-                                            )}
-                                            <span className="inline-flex items-center gap-1.5">
-                                                <CalendarDays className="size-4" aria-hidden="true" />
-                                                {job.applyBy ? `Apply by ${job.applyBy}` : "No closing date"}
-                                            </span>
-                                        </div>
-                                        <div className="mt-6 border-t border-border pt-4 text-sm text-muted-foreground">
-                                            {job.skillCount} {job.skillCount === 1 ? "skill" : "skills"} selected
-                                        </div>
-                                    </article>
+                                    <Link key={job.id} to={`/job-posting/${job.id}`} className="block rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+                                        <JobPostingCard
+                                            job={{
+                                                ...job,
+                                                departmentName: job.department.name,
+                                                skills: job.jobSkills.map((jobSkill) => ({
+                                                    id: jobSkill.skill.id,
+                                                    name: jobSkill.skill.name,
+                                                    isRequired: jobSkill.isRequired,
+                                                })),
+                                            }}
+                                        />
+                                    </Link>
                                 ))}
                             </div>
                         ) : (
