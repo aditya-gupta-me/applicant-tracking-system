@@ -57,7 +57,8 @@ jobPostingRouter.post('/create', protectedRoute, async (req: Request, res: Respo
                     startDate: body.data.startDate,
                     type: body.data.type,
                     departmentId: body.data.departmentId,
-                    organizationId: organizationId
+                    organizationId: organizationId,
+                    userId: userId
                 }
             })
             const jobSkills = body.data.selectedSkill?.map((skill) => ({
@@ -92,5 +93,90 @@ jobPostingRouter.post('/create', protectedRoute, async (req: Request, res: Respo
         })
     }
 })
+
+jobPostingRouter.get(['/get', '/view'], protectedRoute, async (req: Request, res: Response) => {
+    console.log(req.method, req.baseUrl + req.path);
+
+    const user = req.user;
+
+    if(!user?.id) {
+        return res.status(403).json({
+            message: 'Unauthorized'
+        })
+    }
+
+    try {
+        const orgId = await getOrganizationId(user.id)
+
+        if(!orgId) {
+            return res.status(403).json({
+                message: 'You must belong to an organization'
+            });
+        }
+
+        const jobs = await prisma.job.findMany({
+            where: {
+                organizationId: orgId,
+            },
+            include: {
+                department: true,
+                jobSkills: {
+                    include: {
+                        skill: true,
+                    },
+                },
+            },
+        })
+
+        return res.status(200).json({
+            jobs,
+        })
+
+    } catch(error) {
+        console.error("ERROR: ", error);
+        return res.status(500).json({
+            error
+        })
+    }
+})
+
+jobPostingRouter.get('/get/:jobId', protectedRoute, async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+
+    if (!userId) {
+        return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    try {
+        const organizationId = await getOrganizationId(userId);
+        if (!organizationId) {
+            return res.status(403).json({ message: 'You must belong to an organization' });
+        }
+
+        const job = await prisma.job.findFirst({
+            where: {
+                id: req.params.jobId,
+                organizationId,
+            },
+            include: {
+                department: true,
+                jobSkills: {
+                    include: {
+                        skill: true,
+                    },
+                },
+            },
+        });
+
+        if (!job) {
+            return res.status(404).json({ message: 'Job posting not found' });
+        }
+
+        return res.status(200).json({ job });
+    } catch (error) {
+        console.error("ERROR: ", error);
+        return res.status(500).json({ error });
+    }
+});
 
 export default jobPostingRouter;

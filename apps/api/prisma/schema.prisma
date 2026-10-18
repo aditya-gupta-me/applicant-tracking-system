@@ -55,6 +55,7 @@ model User {
 
   adminOfOrganization     Organization?
   organizationMembers     OrganizationMember[]
+  jobPostingUser          Job[]
 
   sessions      Session[]
   accounts      Account[]
@@ -218,6 +219,9 @@ model Job {
 
   departmentId    String
   department      Department    @relation(fields: [organizationId, departmentId], references: [organizationId, id], onDelete: Cascade)
+
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   jobSkills       JobSkill[]
 
