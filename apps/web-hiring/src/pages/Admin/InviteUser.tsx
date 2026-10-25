@@ -22,8 +22,8 @@ export default function InviteMember() {
                 organizationName="Your workspace"
                 items={[
                     { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-                    ...(admin ? [{ label: "Invite team members", href: "/invite-members", icon: UserPlus }] : []),
                     { label: "Organization", href: "/organization", icon: Building2 },
+                    ...(admin ? [{ label: "Invite team members", href: "/invite-members", icon: UserPlus }] : []),
                 ]}
             />
             <SidebarInset>
