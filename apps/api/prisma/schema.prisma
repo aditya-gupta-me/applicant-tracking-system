@@ -40,6 +40,12 @@ enum OrganizationInviteStatus {
   EXPIRED
 }
 
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  ARCHIVED
+}
 
 model User {
   id            String    @id @default(uuid())
@@ -211,6 +217,10 @@ model Job {
   startDate       DateTime?
   applyBy         DateTime?
 
+  status          JobStatus     @default(DRAFT)
+  publishedAt     DateTime?
+  closedAt        DateTime?
+
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -228,6 +238,7 @@ model Job {
 
   @@index([organizationId])
   @@index([departmentId])
+  @@index([status])
   @@map("jobs")
 }
 

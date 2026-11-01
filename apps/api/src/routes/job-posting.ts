@@ -56,6 +56,7 @@ jobPostingRouter.post('/create', protectedRoute, async (req: Request, res: Respo
                     location: body.data.location,
                     startDate: body.data.startDate,
                     type: body.data.type,
+                    status: "PUBLISHED",
                     departmentId: body.data.departmentId,
                     organizationId: organizationId,
                     userId: userId
