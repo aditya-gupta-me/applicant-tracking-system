@@ -3,12 +3,12 @@
   "version": "0.0.0",
   "type": "module",
   "private": true,
-  "main": "./src/auth-client.ts",
-  "types": "./src/auth-client.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
-      "types": "./src/auth-client.ts",
-      "default": "./src/auth-client.ts"
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
     }
   },
   "dependencies": {
