@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSession } from "@repo/auth";
+import { useSession } from "../../lib/auth-client";
 import { ArrowLeft, BriefcaseBusiness, Building2, CalendarDays, CheckCircle2, LayoutDashboard, Plus, Tags, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 

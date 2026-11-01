@@ -27,6 +27,24 @@ type SelectedSkill = SkillOption & {
     minimumYearsExperience: number;
 };
 
+export const jobTypeSchema = z.enum(JobType);
+export type JobTypeValue = z.infer<typeof jobTypeSchema>;
+
+export type JobPostingCardData = {
+    id: string;
+    title: string;
+    description: string;
+    location: string | null;
+    type: JobTypeValue;
+    applyBy: string | null;
+    departmentName: string;
+    skills: Array<{
+        id: string;
+        name: string;
+        isRequired: boolean;
+    }>;
+};
+
 export const loginSchema = z.object({
     email: z.email("Please enter a valid email address"),
     password: z.string().refine(
@@ -98,7 +116,7 @@ export const createJobPostingSchema = z.object({
     .refine((date) => date >= new Date(), {
         error: "Job starting date cannot be set in the past."
     }),
-    type: z.enum(JobType),
+    type: jobTypeSchema,
     departmentId: z.string().trim().min(1, "Department ID is required"),
     selectedSkill: SelectedSkillSchema.array(),
 })

@@ -1,7 +1,7 @@
 import { api } from '@/api/api';
 import { useOrganizationStore } from '@/store/useOrganizationStore';
 import { useTeamMembersStore } from '@/store/useTeamMembersStore';
-import { useSession } from '@repo/auth';
+import { useSession } from '../../lib/auth-client';
 import UserProfileWithStats from '@repo/ui/components/blocks/application/user-profiles/with-stats';
 import { useEffect, useState } from 'react';
 

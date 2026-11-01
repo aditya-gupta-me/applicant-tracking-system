@@ -1,5 +1,5 @@
 import AppHeader from "../UI/AppHeader";
-import {  AddSquareIcon, AddTeamIcon } from '@hugeicons/core-free-icons';
+import {  AddSquareIcon } from '@hugeicons/core-free-icons';
 import { OrgOnboardingCard } from "@/components/organization-card";
 
 export default function OnboardingOrganization() {

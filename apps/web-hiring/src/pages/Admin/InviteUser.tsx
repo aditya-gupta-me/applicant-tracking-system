@@ -1,4 +1,4 @@
-import { useSession } from "@repo/auth";
+import { useSession } from "../../lib/auth-client";
 import { Building2, LayoutDashboard, UserPlus } from "lucide-react";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@repo/ui/components/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";

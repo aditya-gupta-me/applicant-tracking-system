@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { useSession } from "@repo/auth";
+import { useSession } from "../../lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type CreateDepartmentInput, createDepartmentSchema } from "@repo/schema";
 import { ArrowLeft, Building2, CheckCircle2, LayoutDashboard, Plus, UserPlus } from "lucide-react";

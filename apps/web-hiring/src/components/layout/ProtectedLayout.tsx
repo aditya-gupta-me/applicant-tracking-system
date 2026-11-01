@@ -1,4 +1,4 @@
-import { useSession } from "@repo/auth";
+import { useSession } from "../../lib/auth-client";
 import { Navigate, Outlet, useLocation } from "react-router-dom"
 import Loading from "../Loading";
 

@@ -1,4 +1,4 @@
-import { useSession } from "@repo/auth";
+import { useSession } from "../lib/auth-client";
 import { Building2, CalendarDays, ChevronRight, Globe, LayoutDashboard, Mail, Plus, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@repo/ui/components/sidebar";

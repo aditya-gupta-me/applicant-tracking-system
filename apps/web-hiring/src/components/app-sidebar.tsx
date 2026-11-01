@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@repo/ui/components/sidebar"
-import { signOut } from "@repo/auth"
+import { signOut } from "../lib/auth-client"
 import { Button } from "@repo/ui/components/button"
 import { BriefcaseBusiness, Building2, ChevronDown, LayoutDashboard, LogOut, UserPlus, UserRound } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"

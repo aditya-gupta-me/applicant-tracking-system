@@ -40,6 +40,12 @@ enum OrganizationInviteStatus {
   EXPIRED
 }
 
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  ARCHIVED
+}
 
 model User {
   id            String    @id @default(uuid())
@@ -55,6 +61,7 @@ model User {
 
   adminOfOrganization     Organization?
   organizationMembers     OrganizationMember[]
+  jobPostingUser          Job[]
 
   sessions      Session[]
   accounts      Account[]
@@ -210,6 +217,10 @@ model Job {
   startDate       DateTime?
   applyBy         DateTime?
 
+  status          JobStatus     @default(DRAFT)
+  publishedAt     DateTime?
+  closedAt        DateTime?
+
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -219,11 +230,15 @@ model Job {
   departmentId    String
   department      Department    @relation(fields: [organizationId, departmentId], references: [organizationId, id], onDelete: Cascade)
 
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   jobSkills       JobSkill[]
 
 
   @@index([organizationId])
   @@index([departmentId])
+  @@index([status])
   @@map("jobs")
 }
 

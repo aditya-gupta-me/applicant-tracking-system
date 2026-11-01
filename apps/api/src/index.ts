@@ -9,13 +9,28 @@ import userRouter from "./routes/user";
 import departmentRouter from "./routes/department";
 import skillsRouter from "./routes/skills";
 import jobPostingRouter from "./routes/job-posting";
+import publicJobRouter from "./routes/public-jobs";
 
 const app: Application = express();
 const PORT: number = process.env.PORT;
 
+
+const allowedOrigins = [
+    'http://localhost:3001',
+    'http://localhost:5173'
+];
+
 // Allow all cross-origin requests
 app.use(cors({
-    origin: 'http://localhost:5173', 
+    origin: function (origin, callback) {
+        if(!origin) return callback(null, true);
+
+        if(allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"]
@@ -48,6 +63,9 @@ app.use('/api/skill', skillsRouter);
 
 // job posting router
 app.use('/api/job-posting', jobPostingRouter);
+
+// public job router
+app.use('/api/public/jobs', publicJobRouter);
 
 // base endpoint
 app.get('/', (req: Request, res: Response) => {
