@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
-import { useSession } from "@repo/auth";
+import { useSession } from "../../lib/auth-client";
 import { ArrowLeft, BookOpen, Building2, CheckCircle2, LayoutDashboard, Plus, Tags } from "lucide-react";
 import { Link } from "react-router-dom";
 

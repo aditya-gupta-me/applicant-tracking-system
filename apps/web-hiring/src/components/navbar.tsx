@@ -21,7 +21,7 @@ import {
 } from "@repo/ui/components/sheet";
 
 import { Link, useNavigate } from "react-router-dom";
-import { signOut, useSession } from "@repo/auth";
+import { signOut, useSession } from "../lib/auth-client";
 import { Skeleton } from "@repo/ui/components/skeleton";
 import { useEffect, useRef, useState } from "react";
 

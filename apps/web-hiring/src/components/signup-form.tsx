@@ -13,7 +13,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { signUpSchema, type SignUpInput } from '@repo/schema';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signUp, useSession } from "@repo/auth"
+import { signUp, useSession } from "../lib/auth-client"
 import Loading from "./Loading";
 import { Spinner } from "@repo/ui/components/spinner";
 

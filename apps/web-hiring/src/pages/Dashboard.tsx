@@ -1,4 +1,4 @@
-import { useSession } from "@repo/auth";
+import { useSession } from "../lib/auth-client";
 import { Link } from "react-router-dom";
 import { Building2, ChevronRight, LayoutDashboard, UserPlus } from "lucide-react";
 import { Button } from "@repo/ui/components/button";

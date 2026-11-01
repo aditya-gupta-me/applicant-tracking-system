@@ -1,4 +1,4 @@
-import { useSession } from "@repo/auth";
+import { useSession } from "../../lib/auth-client";
 import { ArrowLeft, Building2, LayoutDashboard, UserPlus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { AppSidebar } from "@/components/app-sidebar";
