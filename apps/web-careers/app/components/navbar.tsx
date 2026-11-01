@@ -5,9 +5,12 @@ import { LogOut, Settings, UserRound } from "lucide-react";
 
 import { Button } from "@repo/ui/components/button";
 import { signOut, useSession } from "../lib/auth-client";
+import { useRouter } from "next/navigation"; 
 
 export function Navbar() {
   const { isPending, data } = useSession();
+
+  const router = useRouter();
 
   return (
     <header className="border-b border-border">
@@ -55,7 +58,11 @@ export function Navbar() {
                 </Link>
                 <button
                   type="button"
-                  onClick={() => void signOut()}
+                  onClick={ async () => {
+                    await signOut();
+                    router.replace('/login');
+                    router.refresh();
+                  }}
                   className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm hover:bg-muted"
                 >
                   <LogOut aria-hidden="true" className="size-4" />
