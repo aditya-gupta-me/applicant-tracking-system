@@ -2,9 +2,13 @@ import express, { Request, Response, Router } from 'express';
 import { prisma } from '../lib/prisma';
 import { protectedRoute } from '../middleware/auth.middleware';
 import z from 'zod';
-import { createJobPostingSchema } from '@repo/schema';
+import { applyForJobSchema, createJobPostingSchema } from '@repo/schema';
+import breakdownName from '../utils/extractName';
+import multer from "multer";
 
 const jobPostingRouter: Router = express.Router();
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 
 async function getOrganizationId(userId: string) {
@@ -142,6 +146,8 @@ jobPostingRouter.get(['/get', '/view'], protectedRoute, async (req: Request, res
 })
 
 jobPostingRouter.get('/get/:jobId', protectedRoute, async (req: Request, res: Response) => {
+    console.log(req.method, req.baseUrl + req.path);
+
     const userId = req.user?.id;
 
     if (!userId) {
@@ -179,5 +185,75 @@ jobPostingRouter.get('/get/:jobId', protectedRoute, async (req: Request, res: Re
         return res.status(500).json({ error });
     }
 });
+
+
+jobPostingRouter.post('/apply', upload.single("resume"), async (req: Request, res: Response) => {
+    console.log(req.method, req.baseUrl + req.path);
+
+    if(!req.file) {
+        return res.status(400).json({
+            error: 'Resume is required'
+        });
+    }
+
+    const resume = new File(
+            [req.file.buffer],
+            req.file.originalname,
+            { type: req.file.mimetype }
+        );
+
+    const body = z.safeParse(applyForJobSchema, {
+        ...req.body,
+            resume
+    });
+
+    if (!body.success) {
+        return res.status(400).json({
+            error: body.error.message
+        });
+    }
+
+    try {
+
+        const { firstName, lastName }  = breakdownName(body.data.name);
+
+        console.log('Broken down firstName: ', firstName, ' lastName: ', lastName);
+
+        // transaction (one unit)
+        const result = await prisma.$transaction(async (tx) => {
+            // create a candidate record
+            const candidate = await tx.candidate.create({
+                data: {
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: body.data.email,
+                    contactNumber: body.data.contactNumber,
+                    currentCity: body.data.currentCity || "",
+                }
+            })
+
+            // create application for the applied job
+            const application = await tx.application.create({
+                data: {
+                    candidateId: candidate.id,
+                    jobId: body.data.jobId
+                }
+            })
+
+            return application;
+        })
+
+        // return the application id
+        return res.status(200).json({
+            applicationId: result.id
+        });
+    } catch (error) {
+        console.error("ERROR: ", error);
+
+        return res.status(500).json({
+            error
+        });
+    }
+})
 
 export default jobPostingRouter;

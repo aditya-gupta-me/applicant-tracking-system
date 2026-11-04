@@ -134,6 +134,27 @@ export const createSkillsSchema = z.object({
     categoryId: z.string().trim().min(1, "Category ID is required")
 })
 
+export const applyForJobSchema = z.object({
+    name: z.string().trim().min(1, "Candidate name is required"),
+    email: z.email("Please enter a valid email"),
+    contactNumber: z.string().regex(/^[6-9]\d{9}$/, {
+        error: "Please enter a valid Indian mobile number"
+    }),
+    currentCity: z.string().trim().min(1).optional(),
+    resume: z.file()
+    .max(5 * 1024 * 1024,
+        {
+            error: 'File size must be 5MB or less.'
+        }
+    )
+    .mime("application/pdf", 
+        {
+            error: "Only PDF files are supported."
+        }
+    ),
+    jobId: z.string()
+})
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type OrganizationInput = z.infer<typeof createOrganizationSchema>;
@@ -144,3 +165,4 @@ export type GetDepartmentInput = z.infer<typeof getDepartmentsSchema>;
 export type CreateJobPostingInput = z.infer<typeof createJobPostingSchema>;
 export type CreateSkillCategoryInput = z.infer<typeof createSkillCategorySchema>;
 export type CreateSkillsInput = z.infer<typeof createSkillsSchema>;
+export type ApplyForJobInput = z.infer<typeof applyForJobSchema>;

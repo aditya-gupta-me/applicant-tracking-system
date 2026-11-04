@@ -234,6 +234,7 @@ model Job {
   user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   jobSkills       JobSkill[]
+  applications     Application[]
 
 
   @@index([organizationId])
@@ -261,7 +262,7 @@ model JobSkill {
 model Candidate {
   id                    String      @id  @default(uuid())
   firstName             String
-  lastName              String
+  lastName              String?
   email                 String
   contactNumber         String
   currentCity           String
@@ -273,6 +274,7 @@ model Candidate {
   candidateExperiences  CandidateExperience[]
   candidateEducation    CandidateEducation[]
   candidateSkills       CandidateSkill[]
+  applications           Application[]
 
   @@unique([email])
   @@map("candidate")
@@ -401,4 +403,18 @@ model Onboarding {
   user                         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("onboarding")
+}
+
+model Application {
+  id                           String          @id @default(uuid())
+
+  candidateId                  String
+  candidate                    Candidate     @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+
+  jobId                        String
+  job                          Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([candidateId, jobId])
+  @@map("application")
 }
