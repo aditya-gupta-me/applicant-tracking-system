@@ -195,7 +195,7 @@ async function JobPageContent({
                         <p className="mt-2 text-sm leading-6 text-muted-foreground">
                             Sign in or create an account to submit your application.
                         </p>
-                        <Button className="mt-6 w-full" render={<Link href="/login" />} nativeButton={false}>
+                        <Button className="mt-6 w-full" render={<Link href={`/job-apply/${job.id}`} />} nativeButton={false}>
                             Apply for this role
                         </Button>
                         <p className="mt-4 text-center text-xs text-muted-foreground">

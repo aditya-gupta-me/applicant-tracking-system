@@ -54,6 +54,7 @@ export function LoginForm({
 
       // successful log-in
       router.replace('/jobs');
+      router.refresh();
     }
     if(isPending){
       return <Loading/>;
