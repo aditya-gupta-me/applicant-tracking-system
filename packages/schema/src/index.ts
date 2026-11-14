@@ -142,16 +142,8 @@ export const applyForJobSchema = z.object({
     }),
     currentCity: z.string().trim().min(1).optional(),
     resume: z.file()
-    .max(5 * 1024 * 1024,
-        {
-            error: 'File size must be 5MB or less.'
-        }
-    )
-    .mime("application/pdf", 
-        {
-            error: "Only PDF files are supported."
-        }
-    ),
+                .max(5 * 1024 * 1024, "File size must be 5MB or less.")
+                .mime("application/pdf", "Only PDF files are supported."),
     jobId: z.string()
 })
 

@@ -56,7 +56,7 @@ async function JobsPageContent() {
 
       <div className="mt-8 grid gap-6 md:grid-cols-2">
         {jobs.map((job) => (
-          <Link key={job.id} href={`/jobs/${job.id}`} className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <Link key={job.id} href={`/job-detail/${job.id}`} className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <JobPostingCard
               job={{
                 id: job.id,
