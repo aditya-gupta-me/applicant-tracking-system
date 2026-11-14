@@ -5,10 +5,37 @@ import z from 'zod';
 import { applyForJobSchema, createJobPostingSchema } from '@repo/schema';
 import breakdownName from '../utils/extractName';
 import multer from "multer";
+import path from 'path';
+import fs from 'fs';
 
 const jobPostingRouter: Router = express.Router();
 
-const upload = multer({ storage: multer.memoryStorage() });
+const uploadDir = path.join(__dirname, 'uploads');
+
+if(!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
+const storage = multer.diskStorage({
+    destination: (req, res, cb) => {
+        cb(null, uploadDir);
+    },
+    filename(req, file, cb) {
+        const uniqueName = `${Date.now()}-${file.originalname}`;
+        cb(null, uniqueName);
+    },
+})
+
+const upload = multer({ 
+    storage: storage,
+    fileFilter(req, file, cb) {
+        if(file.mimetype === 'application/pdf') {
+            cb(null, true);
+        } else {
+            cb(new Error('Only PDF files are allowed.'));
+        }
+    },
+});
 
 
 async function getOrganizationId(userId: string) {
@@ -200,7 +227,7 @@ jobPostingRouter.post('/apply', upload.single("resume"), async (req: Request, re
             [req.file.buffer],
             req.file.originalname,
             { type: req.file.mimetype }
-        );
+    );
 
     const body = z.safeParse(applyForJobSchema, {
         ...req.body,
