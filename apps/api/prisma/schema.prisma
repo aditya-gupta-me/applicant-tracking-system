@@ -47,6 +47,13 @@ enum JobStatus {
   ARCHIVED
 }
 
+enum ResumeExtractionStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+}
+
 model User {
   id            String    @id @default(uuid())
   name          String
@@ -415,6 +422,85 @@ model Application {
   jobId                        String
   job                          Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
+  resume                       ApplicationResume[]
+
   @@unique([candidateId, jobId])
   @@map("application")
+}
+
+model ApplicationResume {
+  id                           String        @id  @default(uuid())
+  applicationId                String
+  application                  Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  storageKey                   String
+  originalFileName                 String
+  mimeType                     String
+  sizeBytes                    Int
+  checkSumSha256               String?
+
+  version                      Int            @default(1)
+  uploadedAt                   DateTime       @default(now())
+  
+  extractions                  ResumeExtraction[]
+
+  @@unique([applicationId, version])
+  @@index([applicationId, uploadedAt])
+  @@map("application_resume")
+}
+
+model ResumeExtraction {
+  id                            String              @id  @default(uuid())
+
+  resumeId                      String
+  resume                        ApplicationResume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  runNumber                     Int                 @default(1)
+
+  status                        ResumeExtractionStatus   @default(PENDING)
+
+  deliveryAttempts              Int                      @default(1)
+
+  extractedText                 String?                  @db.Text
+  structuredData                Json?
+
+  extractorName                 String?
+  extractorVersion              String?
+  llmProvider                   String?
+  llmModel                      String?
+  promptVersion                 String?
+
+  startedAt                     DateTime?
+  completedAt                   DateTime?
+
+  errorCode                     String?
+  errorMessage                  String?                   @db.Text
+
+  createdAt                     DateTime                  @default(now())
+  updatedAt                     DateTime                  @updatedAt
+
+
+  @@unique([resumeId, runNumber])
+  @@index([resumeId, createdAt])
+  @@index([status, createdAt])
+  @@map("resume_extraction")
+}
+
+model OutboxEvent {
+  id                            String              @id @default(uuid())
+  eventType                     String
+  aggregateType                 String
+  aggregateId                   String
+  payload                       Json
+
+  createdAt                     DateTime            @default(now())
+  publishedAt                   DateTime?
+
+  attempts                      Int                 @default(0)
+  nextAttemptAt                 DateTime?
+  lockedUntil                   DateTime?
+  lastError                     String?
+
+  @@index([publishedAt, nextAttemptAt, createdAt])
+  @@map("outbox_event")
 }

@@ -267,12 +267,47 @@ jobPostingRouter.post('/apply', upload.single("resume"), async (req: Request, re
                 }
             })
 
-            return application;
+            const resume = await tx.applicationResume.create({
+                data: {
+                    applicationId: application.id,
+                    storageKey: `${req.file?.destination}/${req.file?.originalname}`,
+                    originalFileName: req.file!.originalname,
+                    mimeType: req.file!.mimetype,
+                    sizeBytes: req.file!.size,
+                    version: 1
+                }
+            })
+
+            const extraction = await tx.resumeExtraction.create({
+                data: {
+                    resumeId: resume.id,
+                    runNumber: 1,
+                    status: 'PENDING',
+                }   
+            })
+
+            await tx.outboxEvent.create({
+                data: {
+                    eventType: "resume.parse.requested",
+                    aggregateType: "ApplicationResume",
+                    aggregateId: resume.id,
+                    payload: {
+                        applicationId: application.id,
+                        resumeId: resume.id,
+                        extractionId: extraction.id
+                    },
+                },
+            })
+            return {
+                candidateId: candidate.id,
+                applicationId: application.id,
+                resumeId: resume.id
+            };
         })
 
         // return the application id
         return res.status(200).json({
-            applicationId: result.id
+            result
         });
     } catch (error) {
         console.error("ERROR: ", error);
