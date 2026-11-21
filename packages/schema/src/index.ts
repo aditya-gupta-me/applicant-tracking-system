@@ -72,12 +72,12 @@ export const createOrganizationSchema = z.object({
     .refine((date) => date <= new Date(), {
         error: "Established date cannot be in the future"
     })
-})
+});
 
 export const inviteUserInOrganizationSchema = z.object({
     email: z.email("Please enter a valid email address"),
     role: z.enum(UserRole)
-})
+});
 
 export const updateOrganizationSchema = z.object({
     name: z.string().trim().min(1, "Organization name is required"),
@@ -85,15 +85,15 @@ export const updateOrganizationSchema = z.object({
     email: z.email("Please enter a valid email address"),
     website: z.url("Invalid URL layout"),
     establishedDate: z.coerce.date()
-})
+});
 
 export const createDepartmentSchema = z.object({
     name: z.string().trim().min(1, "Department name is required")
-})
+});
 
 export const getDepartmentsSchema = z.object({
     orgId: z.string().min(1, "Organization Id is required")
-})
+});
 
 const SelectedSkillSchema: z.ZodType<SelectedSkill> = z.object({
     id: z.string().trim().min(1, "Skill Id is required"),
@@ -119,20 +119,20 @@ export const createJobPostingSchema = z.object({
     type: jobTypeSchema,
     departmentId: z.string().trim().min(1, "Department ID is required"),
     selectedSkill: SelectedSkillSchema.array(),
-})
+});
 
 export const createSkillCategorySchema = z.object({
     categoryName: z.string().trim().min(1, "Skill category name is required"),
     description: z.string().trim().min(1, "Skill category description is missing").or(z.literal("")).optional(),
     createdAt: z.coerce.date()
-})
+});
 
 export const createSkillsSchema = z.object({
     name: z.string().trim().min(1, "Skill name is required"),
     isActive: z.boolean(),
     createdAt: z.coerce.date(),
     categoryId: z.string().trim().min(1, "Category ID is required")
-})
+});
 
 export const applyForJobSchema = z.object({
     name: z.string().trim().min(1, "Candidate name is required"),
@@ -145,7 +145,17 @@ export const applyForJobSchema = z.object({
                 .max(5 * 1024 * 1024, "File size must be 5MB or less.")
                 .mime("application/pdf", "Only PDF files are supported."),
     jobId: z.string()
-})
+});
+
+export const messageEventSchema = z.object({
+    messageId: z.string(),
+    eventType: z.string(),
+    payload: z.object({
+        resumeId: z.string(),
+        extractionId: z.string(),
+        applicationId: z.string()
+    })
+});
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
