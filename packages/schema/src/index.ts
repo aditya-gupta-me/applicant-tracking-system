@@ -168,3 +168,4 @@ export type CreateJobPostingInput = z.infer<typeof createJobPostingSchema>;
 export type CreateSkillCategoryInput = z.infer<typeof createSkillCategorySchema>;
 export type CreateSkillsInput = z.infer<typeof createSkillsSchema>;
 export type ApplyForJobInput = z.infer<typeof applyForJobSchema>;
+export type MessageEventInput = z.infer<typeof messageEventSchema>;
